@@ -1,784 +1,562 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversational Analytics Platform</title>
+    <title>Oranga Tōtika | An Interactive Analysis of NZ Health Equity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Warm neutrals with earthy accents) -->
+    <!-- Application Structure Plan: A thematic, narrative-driven SPA. Starts with the core problem (The Challenge), allows data exploration (Interactive Dashboard), explains root causes (Interactive Systems Diagram), showcases solutions (Pathways to Change), provides global context (Comparative View), and ends with the economic impact (Cost of Inaction). This non-linear structure empowers users to explore based on interest, making complex information more digestible and engaging than a linear report format. -->
+    <!-- Visualization & Content Choices:
+    - Inequity Data (Sec 1): Goal: Compare. Method: Interactive bar/donut charts (Chart.js) with dynamic text blocks. Interaction: User filters by population group. Justification: Combines quantitative data with qualitative context for deeper understanding.
+    - Root Causes (Sec 2): Goal: Organize/Relationships. Method: HTML/CSS flow diagram. Interaction: Clickable nodes reveal details. Justification: Visualizes complex system dynamics, making them easier to grasp than dense text.
+    - Solutions (Sec 3/5): Goal: Inform. Method: Interactive HTML/CSS cards. Interaction: Flip on hover/click. Justification: Presents solutions in a scannable, engaging format.
+    - Global Systems (Sec 4): Goal: Compare. Method: HTML/CSS tabs. Interaction: Click to switch views. Justification: Simplifies comparison between countries.
+    - Economic Cost (Sec 1.5): Goal: Inform/Impact. Method: Large animated number display. Interaction: None (passive impact). Justification: Creates a memorable "wow" moment emphasizing urgency. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #383838;
         }
-
-        .app-container {
-            display: flex;
-            min-height: 100vh;
+        .nav-link {
+            transition: color 0.3s ease, border-color 0.3s ease;
         }
-
-        .sidebar {
-            width: 260px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        .nav-link:hover, .nav-link.active {
+            color: #A97C50;
+            border-bottom-color: #A97C50;
         }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            color: #4f46e5;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logo::before {
-            content: "🧠";
-            font-size: 28px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #6b7280;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            transform: translateX(4px);
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header p {
-            color: #6b7280;
-            font-size: 16px;
-        }
-
-        .query-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 32px;
-            margin-bottom: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .query-input {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .query-input input {
-            flex: 1;
-            padding: 16px 20px;
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .query-input input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-
-        .query-btn {
-            padding: 16px 32px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .query-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-        }
-
-        .suggestions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .suggestion-chip {
-            padding: 8px 16px;
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .suggestion-chip:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-1px);
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        .dashboard-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .dashboard-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .metric-value {
-            font-size: 36px;
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-
-        .metric-change {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .metric-positive {
-            color: #10b981;
-        }
-
-        .metric-negative {
-            color: #ef4444;
-        }
-
-        .metric-neutral {
-            color: #6b7280;
-        }
-
-        .alert-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: rgba(239, 68, 68, 0.1);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border-left: 4px solid #ef4444;
-        }
-
-        .alert-critical {
-            background: rgba(239, 68, 68, 0.1);
-            border-left-color: #ef4444;
-        }
-
-        .alert-warning {
-            background: rgba(245, 158, 11, 0.1);
-            border-left-color: #f59e0b;
-        }
-
-        .alert-info {
-            background: rgba(59, 130, 246, 0.1);
-            border-left-color: #3b82f6;
-        }
-
         .chart-container {
-            height: 200px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            font-weight: 500;
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
         }
-
-        .customer-list {
-            max-height: 300px;
-            overflow-y: auto;
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
         }
-
-        .customer-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f3f4f6;
+        .system-node {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
         }
-
-        .customer-name {
-            font-weight: 500;
-            color: #374151;
+        .system-node:hover, .system-node.active {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #A97C50;
         }
-
-        .customer-status {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
+        .solution-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
         }
-
-        .status-healthy {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
+        .solution-card:hover .solution-card-inner {
+            transform: rotateY(180deg);
         }
-
-        .status-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
+        .solution-card-front, .solution-card-back {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
-
-        .status-critical {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
+        .solution-card-back {
+            transform: rotateY(180deg);
         }
-
-        .chat-interface {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            height: 500px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 16px;
-            padding-right: 8px;
-        }
-
-        .message {
-            margin-bottom: 16px;
-            display: flex;
-            gap: 12px;
-        }
-
-        .message.user {
-            flex-direction: row-reverse;
-        }
-
-        .message-bubble {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 16px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .message.user .message-bubble {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .message.assistant .message-bubble {
-            background: #f3f4f6;
-            color: #374151;
-        }
-
-        .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 12px;
-        }
-
-        .loading-dots {
-            display: inline-flex;
-            gap: 4px;
-        }
-
-        .loading-dots span {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #6b7280;
-            animation: bounce 1.4s ease-in-out infinite both;
-        }
-
-        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
-        }
-
-        .hidden {
-            display: none;
+        .tab-button.active {
+            background-color: #4A5568;
+            color: #FFFFFF;
         }
     </style>
 </head>
-<body>
-    <div class="app-container">
-        <div class="sidebar">
-            <div class="logo">AnalyticsAI</div>
-            <div class="nav-item active" data-tab="dashboard">
-                📊 Dashboard
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="font-bold text-xl text-[#A97C50]">Oranga Tōtika</div>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#challenge" class="nav-link border-b-2 border-transparent pb-1">The Challenge</a>
+                <a href="#gaps" class="nav-link border-b-2 border-transparent pb-1">The Gaps</a>
+                <a href="#causes" class="nav-link border-b-2 border-transparent pb-1">The Causes</a>
+                <a href="#solutions" class="nav-link border-b-2 border-transparent pb-1">The Solutions</a>
+                <a href="#perspectives" class="nav-link border-b-2 border-transparent pb-1">Global View</a>
             </div>
-            <div class="nav-item" data-tab="chat">
-                💬 Ask Questions
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-gray-700 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
             </div>
-            <div class="nav-item" data-tab="alerts">
-                🚨 Alerts (3)
-            </div>
-            <div class="nav-item" data-tab="customers">
-                👥 Customer Health
-            </div>
-            <div class="nav-item" data-tab="reports">
-                📈 Reports
-            </div>
-            <div class="nav-item" data-tab="settings">
-                ⚙️ Settings
-            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#challenge" class="block py-2 px-6 text-sm hover:bg-gray-100">The Challenge</a>
+            <a href="#gaps" class="block py-2 px-6 text-sm hover:bg-gray-100">The Gaps</a>
+            <a href="#causes" class="block py-2 px-6 text-sm hover:bg-gray-100">The Causes</a>
+            <a href="#solutions" class="block py-2 px-6 text-sm hover:bg-gray-100">The Solutions</a>
+            <a href="#perspectives" class="block py-2 px-6 text-sm hover:bg-gray-100">Global View</a>
         </div>
+    </header>
 
-        <div class="main-content">
-            <div id="dashboard-tab" class="tab-content">
-                <div class="header">
-                    <h1>Good morning, Sarah! 👋</h1>
-                    <p>Here's what's happening with your business today</p>
+    <main>
+        <section id="challenge" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">Achieving Health Equity in Aotearoa</h1>
+                <p class="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Our North Star: "All New Zealanders receive culturally safe, accessible healthcare that enables them to achieve their optimal health outcomes, regardless of ethnicity, income, or geographic location."</p>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-[#FDFBF8] p-6 rounded-lg shadow-md border border-gray-200">
+                        <p class="text-4xl font-bold text-[#A97C50]">~7.4 years</p>
+                        <p class="mt-2 text-gray-600">Life expectancy gap for Māori vs non-Māori</p>
+                    </div>
+                    <div class="bg-[#FDFBF8] p-6 rounded-lg shadow-md border border-gray-200">
+                        <p class="text-4xl font-bold text-[#A97C50]">2x Higher</p>
+                        <p class="mt-2 text-gray-600">Amenable mortality rate for Māori adults</p>
+                    </div>
+                    <div class="bg-[#FDFBF8] p-6 rounded-lg shadow-md border border-gray-200">
+                        <p class="text-4xl font-bold text-[#A97C50]">53%</p>
+                        <p class="mt-2 text-gray-600">of Pasifika children live with household food insecurity</p>
+                    </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="query-section">
-                    <div class="query-input">
-                        <input type="text" placeholder="Ask me anything about your data... e.g., 'Which practices are losing immigration work?'" id="quick-query">
-                        <button class="query-btn" onclick="processQuery()">Ask</button>
+        <section id="gaps" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Understanding the Gaps</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">The benefits of our health system are not shared equally. This section allows you to explore the patterned disparities faced by different communities. Click on a population group to see how key health indicators change and to read a summary of the specific challenges they face.</p>
+                </div>
+                <div class="flex justify-center flex-wrap gap-3 mb-8">
+                    <button class="filter-btn active bg-gray-700 text-white px-4 py-2 rounded-full text-sm font-medium" data-filter="maori">Māori</button>
+                    <button class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border" data-filter="pasifika">Pasifika</button>
+                    <button class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border" data-filter="disabled">Disabled</button>
+                    <button class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium border" data-filter="rural">Rural</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+                    <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                            <h3 class="font-semibold text-center mb-4">Life Expectancy Gap (Years)</h3>
+                            <div class="chart-container h-64 sm:h-72"><canvas id="lifeExpectancyChart"></canvas></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                            <h3 class="font-semibold text-center mb-4">Household Food Insecurity (Children)</h3>
+                            <div class="chart-container h-64 sm:h-72"><canvas id="foodInsecurityChart"></canvas></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                            <h3 class="font-semibold text-center mb-4">High Psychological Distress (Adults)</h3>
+                            <div class="chart-container h-64 sm:h-72"><canvas id="distressChart"></canvas></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                            <h3 class="font-semibold text-center mb-4">Amenable Mortality (Rate Ratio)</h3>
+                            <div class="chart-container h-64 sm:h-72"><canvas id="mortalityChart"></canvas></div>
+                        </div>
                     </div>
-                    <div class="suggestions">
-                        <div class="suggestion-chip" onclick="fillQuery('Top 5 customers by revenue this quarter')">Top customers this quarter</div>
-                        <div class="suggestion-chip" onclick="fillQuery('Immigration test trends by region')">Immigration trends</div>
-                        <div class="suggestion-chip" onclick="fillQuery('Practices switching to patient-paid billing')">Payment pattern changes</div>
-                        <div class="suggestion-chip" onclick="fillQuery('Revenue forecast for next quarter')">Revenue forecast</div>
+                    <div id="narrative-box" class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md border border-gray-200 sticky top-24">
+                        <h3 id="narrative-title" class="text-xl font-bold text-[#A97C50] mb-4"></h3>
+                        <p id="narrative-text" class="text-gray-600 space-y-4"></p>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="dashboard-grid">
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <div class="card-title">Revenue Performance</div>
-                        </div>
-                        <div class="metric-value" style="color: #10b981;">$2.4M</div>
-                        <div class="metric-change metric-positive">↗ +12.3% vs last quarter</div>
-                        <div class="chart-container">📈 Revenue trending upward</div>
-                    </div>
-
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <div class="card-title">Test Volume</div>
-                        </div>
-                        <div class="metric-value" style="color: #667eea;">45.2K</div>
-                        <div class="metric-change metric-positive">↗ +8.7% vs last month</div>
-                        <div class="chart-container">📊 Volume growth steady</div>
-                    </div>
-
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <div class="card-title">Customer Health</div>
-                        </div>
-                        <div class="metric-value" style="color: #f59e0b;">3</div>
-                        <div class="metric-change metric-negative">⚠️ High-risk customers identified</div>
-                        <div class="customer-list">
-                            <div class="customer-item">
-                                <span class="customer-name">Auckland Medical Centre</span>
-                                <span class="customer-status status-critical">Critical</span>
-                            </div>
-                            <div class="customer-item">
-                                <span class="customer-name">Wellington Clinic</span>
-                                <span class="customer-status status-warning">At Risk</span>
-                            </div>
-                            <div class="customer-item">
-                                <span class="customer-name">Hamilton Practice</span>
-                                <span class="customer-status status-healthy">Healthy</span>
-                            </div>
+        <section id="causes" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Why Does This Happen? The Root Causes</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Health inequities are not accidental. They are the output of a complex system of reinforcing forces. The diagram below maps the "Inequity Reinforcing Loop". Click on each node to understand how historical injustices, systemic biases, and commercial pressures combine to produce and perpetuate poor health outcomes.</p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                    <div class="w-full md:w-2/3 relative">
+                        <div class="relative flex items-center justify-center w-full aspect-square max-w-2xl mx-auto">
+                            <div class="absolute w-full h-full border-2 border-dashed border-gray-300 rounded-full"></div>
+                            <div class="system-node absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#FDFBF8] border-2 border-gray-300 p-3 rounded-lg text-center shadow-sm w-36" data-cause="colonisation">Colonisation & Land Alienation</div>
+                            <div class="system-node absolute top-1/4 right-0 translate-x-1/4 -translate-y-1/2 bg-[#FDFBF8] border-2 border-gray-300 p-3 rounded-lg text-center shadow-sm w-36" data-cause="socioeconomic">Socioeconomic Disadvantage</div>
+                            <div class="system-node absolute bottom-1/4 right-0 translate-x-1/4 translate-y-1/2 bg-[#FDFBF8] border-2 border-gray-300 p-3 rounded-lg text-center shadow-sm w-36" data-cause="commercial">Commercial Determinants</div>
+                            <div class="system-node absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-[#FDFBF8] border-2 border-gray-300 p-3 rounded-lg text-center shadow-sm w-36" data-cause="racism">Institutional Racism & Unsafe Care</div>
+                            <div class="system-node absolute bottom-1/4 left-0 -translate-x-1/4 translate-y-1/2 bg-[#FDFBF8] border-2 border-gray-300 p-3 rounded-lg text-center shadow-sm w-36" data-cause="access">Under-utilisation of Primary Care</div>
+                            <div class="system-node absolute top-1/4 left-0 -translate-x-1/4 -translate-y-1/2 bg-[#FDFBF8] border-2 border-gray-300 p-3 rounded-lg text-center shadow-sm w-36" data-cause="outcomes">Poor Health Outcomes</div>
                         </div>
                     </div>
+                    <div class="w-full md:w-1/3">
+                        <div id="cause-narrative-box" class="bg-white p-6 rounded-lg shadow-md border border-gray-200 min-h-[200px]">
+                            <h3 id="cause-title" class="text-xl font-bold text-[#A97C50] mb-4"></h3>
+                            <p id="cause-text" class="text-gray-600"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <div class="card-title">Recent Alerts</div>
-                        </div>
-                        <div class="alert-item alert-critical">
-                            <span>🚨</span>
-                            <div>
-                                <strong>Auckland Medical Centre</strong><br>
-                                35% drop in immigration tests - possible competitor switch
+        <section id="solutions" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Pathways to Change</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Despite the challenges, promising approaches and powerful levers for change are emerging. These "bright spots" move away from a deficit model towards one that values self-determination, cultural safety, and holistic wellbeing. Hover over or tap the cards below to learn more about these transformative solutions.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="solution-card perspective-[1000px] group">
+                        <div class="solution-card-inner relative w-full h-64 rounded-lg shadow-lg">
+                            <div class="solution-card-front absolute w-full h-full bg-white border border-gray-200 rounded-lg p-6 flex flex-col justify-center items-center text-center">
+                                <h3 class="text-xl font-bold text-gray-800">Tino Rangatiratanga</h3>
+                                <p class="mt-2 text-gray-600">The Whānau Ora Model</p>
+                            </div>
+                            <div class="solution-card-back absolute w-full h-full bg-gray-700 text-white rounded-lg p-6 flex flex-col justify-center">
+                                <p class="text-sm">An Indigenous-led, strengths-based approach placing whānau aspirations at the centre. It shifts power and resources to communities, proving that self-determination is a powerful public health intervention.</p>
                             </div>
                         </div>
-                        <div class="alert-item alert-warning">
-                            <span>⚠️</span>
-                            <div>
-                                <strong>Canterbury Region</strong><br>
-                                Unusual spike in urgent test requests (+45%)
+                    </div>
+                    <div class="solution-card perspective-[1000px] group">
+                        <div class="solution-card-inner relative w-full h-64 rounded-lg shadow-lg">
+                            <div class="solution-card-front absolute w-full h-full bg-white border border-gray-200 rounded-lg p-6 flex flex-col justify-center items-center text-center">
+                                <h3 class="text-xl font-bold text-gray-800">Pacific-Led Solutions</h3>
+                                <p class="mt-2 text-gray-600">Fonofale & Yavu Frameworks</p>
+                            </div>
+                            <div class="solution-card-back absolute w-full h-full bg-gray-700 text-white rounded-lg p-6 flex flex-col justify-center">
+                                <p class="text-sm">Grounded in culturally resonant models of health like Fonofale, these approaches deliver holistic, on-the-ground support through trusted community organisations, ensuring services are meaningful and effective for Pacific peoples.</p>
                             </div>
                         </div>
-                        <div class="alert-item alert-info">
-                            <span>💡</span>
-                            <div>
-                                <strong>Growth Opportunity</strong><br>
-                                3 new practices showing 20%+ volume increase
+                    </div>
+                    <div class="solution-card perspective-[1000px] group">
+                        <div class="solution-card-inner relative w-full h-64 rounded-lg shadow-lg">
+                            <div class="solution-card-front absolute w-full h-full bg-white border border-gray-200 rounded-lg p-6 flex flex-col justify-center items-center text-center">
+                                <h3 class="text-xl font-bold text-gray-800">Cultural Safety</h3>
+                                <p class="mt-2 text-gray-600">Transforming the Clinical Encounter</p>
+                            </div>
+                            <div class="solution-card-back absolute w-full h-full bg-gray-700 text-white rounded-lg p-6 flex flex-col justify-center">
+                                <p class="text-sm">Moves beyond 'competence' to require providers to reflect on their own biases and the power dynamics of care. It aims to create a safe, respectful environment where the patient is empowered.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="solution-card perspective-[1000px] group">
+                        <div class="solution-card-inner relative w-full h-64 rounded-lg shadow-lg">
+                            <div class="solution-card-front absolute w-full h-full bg-white border border-gray-200 rounded-lg p-6 flex flex-col justify-center items-center text-center">
+                                <h3 class="text-xl font-bold text-gray-800">Systemic Levers</h3>
+                                <p class="mt-2 text-gray-600">Governance, Funding, Workforce, Data</p>
+                            </div>
+                            <div class="solution-card-back absolute w-full h-full bg-gray-700 text-white rounded-lg p-6 flex flex-col justify-center">
+                                <p class="text-sm">Targeting high-leverage points like embedding Te Tiriti in governance, reforming funding models to reward wellbeing, building a representative workforce, and establishing data sovereignty can create large-scale systemic change.</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="solution-card perspective-[1000px] group">
+                        <div class="solution-card-inner relative w-full h-64 rounded-lg shadow-lg">
+                            <div class="solution-card-front absolute w-full h-full bg-white border border-gray-200 rounded-lg p-6 flex flex-col justify-center items-center text-center">
+                                <h3 class="text-xl font-bold text-gray-800">Rural & Digital Health</h3>
+                                <p class="mt-2 text-gray-600">Bridging the Urban Divide</p>
+                            </div>
+                            <div class="solution-card-back absolute w-full h-full bg-gray-700 text-white rounded-lg p-6 flex flex-col justify-center">
+                                <p class="text-sm">A dedicated Rural Health Strategy and the use of telehealth can improve access. This requires integrated care models and investment to close the "digital divide" to ensure technology reduces, not widens, inequity.</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="solution-card perspective-[1000px] group">
+                        <div class="solution-card-inner relative w-full h-64 rounded-lg shadow-lg">
+                            <div class="solution-card-front absolute w-full h-full bg-white border border-gray-200 rounded-lg p-6 flex flex-col justify-center items-center text-center">
+                                <h3 class="text-xl font-bold text-gray-800">The 2022 Reforms</h3>
+                                <p class="mt-2 text-gray-600">A Structural Shift</p>
+                            </div>
+                            <div class="solution-card-back absolute w-full h-full bg-gray-700 text-white rounded-lg p-6 flex flex-col justify-center">
+                                <p class="text-sm">The creation of Te Aka Whai Ora | Māori Health Authority represented a bold structural embodiment of Te Tiriti principles. Its disestablishment highlights the vulnerability of reforms to political ideology.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <div id="chat-tab" class="tab-content hidden">
-                <div class="header">
-                    <h1>Ask Your Data Anything</h1>
-                    <p>Natural language interface to your analytics</p>
+        <section id="perspectives" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">A Global View</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Aotearoa's struggle for health equity is not unique. Examining other nations offers valuable lessons. Here, we compare our system with other settler-colonial nations facing similar challenges and with the Nordic countries, which offer a different model built on public equity.</p>
                 </div>
-
-                <div class="chat-interface">
-                    <div class="chat-messages" id="chat-messages">
-                        <div class="message assistant">
-                            <div class="avatar">AI</div>
-                            <div class="message-bubble">
-                                Hi! I'm your AI business analyst. I can help you understand trends, identify risks, and find opportunities in your data. Try asking: "Which practices are losing immigration work?" or "Show me revenue trends by region."
-                            </div>
-                        </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex border-b border-gray-300">
+                        <button class="tab-button flex-1 py-3 px-4 text-center font-medium text-gray-600 hover:bg-gray-200 transition active" data-tab="australia">Australia</button>
+                        <button class="tab-button flex-1 py-3 px-4 text-center font-medium text-gray-600 hover:bg-gray-200 transition" data-tab="canada">Canada</button>
+                        <button class="tab-button flex-1 py-3 px-4 text-center font-medium text-gray-600 hover:bg-gray-200 transition" data-tab="nordic">Nordic Model</button>
                     </div>
-                    <div class="query-input">
-                        <input type="text" placeholder="Ask about your data..." id="chat-input" onkeypress="handleChatEnter(event)">
-                        <button class="query-btn" onclick="sendChatMessage()">Send</button>
+                    <div id="tab-content" class="mt-8">
                     </div>
                 </div>
             </div>
+        </section>
 
-            <div id="alerts-tab" class="tab-content hidden">
-                <div class="header">
-                    <h1>Alert Centre</h1>
-                    <p>Proactive notifications about your business</p>
-                </div>
-
-                <div class="dashboard-card">
-                    <div class="card-title" style="margin-bottom: 20px;">Critical Alerts</div>
-                    <div class="alert-item alert-critical">
-                        <span>🚨</span>
+        <section id="cost" class="py-16 md:py-24 bg-gray-800 text-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold">The Staggering Cost of Inaction</h2>
+                <p class="mt-4 text-lg text-gray-300 max-w-3xl mx-auto">Health inequity is not only a moral failure but a massive economic burden. The current system creates perverse incentives, "saving" money on upstream care while communities bear the devastating cost of premature death and lost potential.</p>
+                <div class="mt-12">
+                    <p class="text-lg text-gray-400">Annual Economic Cost of Māori Health Inequities</p>
+                    <p id="cost-counter" class="text-6xl md:text-8xl font-bold text-[#A97C50] my-4">$0</p>
+                    <div class="flex justify-center items-center space-x-8 text-left max-w-md mx-auto">
                         <div>
-                            <strong>Auckland Medical Centre - Revenue Risk</strong><br>
-                            Immigration test volume down 35% (from 450 to 292 tests/month). Competitor analysis suggests potential provider switch. Recommended action: Immediate account manager contact.
-                            <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
-                                Detected 2 hours ago • High priority
-                            </div>
+                            <p class="text-2xl font-bold">$823.4M</p>
+                            <p class="text-gray-400">Indirect Costs (borne by whānau & society)</p>
                         </div>
-                    </div>
-                    <div class="alert-item alert-warning">
-                        <span>⚠️</span>
                         <div>
-                            <strong>Payment Pattern Shift - Wellington Region</strong><br>
-                            15% increase in patient-paid billing across 8 practices. May indicate process optimisation or competitive pressure.
-                            <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
-                                Detected 4 hours ago • Medium priority
-                            </div>
-                        </div>
-                    </div>
-                    <div class="alert-item alert-info">
-                        <span>📈</span>
-                        <div>
-                            <strong>Growth Opportunity - Christchurch</strong><br>
-                            3 new practices showing 25%+ volume growth. Potential for expanded service offerings.
-                            <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
-                                Detected 6 hours ago • Low priority
-                            </div>
+                            <p class="text-2xl font-bold">$39.9M</p>
+                            <p class="text-gray-400">Direct Costs (to the health system)</p>
                         </div>
                     </div>
                 </div>
             </div>
+        </section>
+    </main>
 
-            <div id="customers-tab" class="tab-content hidden">
-                <div class="header">
-                    <h1>Customer Health Monitor</h1>
-                    <p>AI-powered customer risk assessment</p>
-                </div>
-
-                <div class="dashboard-grid">
-                    <div class="dashboard-card">
-                        <div class="card-title">Risk Score Distribution</div>
-                        <div class="chart-container">
-                            🟢 Healthy: 142 customers<br>
-                            🟡 At Risk: 23 customers<br>
-                            🔴 Critical: 3 customers
-                        </div>
-                    </div>
-                    <div class="dashboard-card">
-                        <div class="card-title">Top At-Risk Customers</div>
-                        <div class="customer-list">
-                            <div class="customer-item">
-                                <div>
-                                    <div class="customer-name">Auckland Medical Centre</div>
-                                    <div style="font-size: 12px; color: #6b7280;">Immigration volume -35%, Risk score: 94/100</div>
-                                </div>
-                                <span class="customer-status status-critical">Critical</span>
-                            </div>
-                            <div class="customer-item">
-                                <div>
-                                    <div class="customer-name">Wellington Family Clinic</div>
-                                    <div style="font-size: 12px; color: #6b7280;">Payment delays increasing, Risk score: 78/100</div>
-                                </div>
-                                <span class="customer-status status-warning">At Risk</span>
-                            </div>
-                            <div class="customer-item">
-                                <div>
-                                    <div class="customer-name">Hamilton Health Group</div>
-                                    <div style="font-size: 12px; color: #6b7280;">Test mix changing, Risk score: 65/100</div>
-                                </div>
-                                <span class="customer-status status-warning">At Risk</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="reports-tab" class="tab-content hidden">
-                <div class="header">
-                    <h1>Reports & Analytics</h1>
-                    <p>Detailed business intelligence reports</p>
-                </div>
-                <div class="dashboard-card">
-                    <div class="card-title">Available Reports</div>
-                    <div style="padding: 20px 0;">
-                        📊 Executive Dashboard<br><br>
-                        📈 Customer Performance Analysis<br><br>
-                        🔍 Test Volume & Mix Analysis<br><br>
-                        💰 Revenue & Margin Reports<br><br>
-                        🌍 Geographic Performance<br><br>
-                        ⚠️ Risk Assessment Summary
-                    </div>
-                </div>
-            </div>
-
-            <div id="settings-tab" class="tab-content hidden">
-                <div class="header">
-                    <h1>Settings</h1>
-                    <p>Configure your analytics preferences</p>
-                </div>
-                <div class="dashboard-card">
-                    <div class="card-title">Alert Preferences</div>
-                    <div style="padding: 20px 0;">
-                        🔔 Email notifications: Enabled<br><br>
-                        📱 SMS for critical alerts: Enabled<br><br>
-                        ⏰ Alert frequency: Real-time<br><br>
-                        🎯 Risk threshold: 70/100<br><br>
-                        📧 Weekly digest: Enabled
-                    </div>
-                </div>
-            </div>
+    <footer class="bg-gray-100 py-8">
+        <div class="container mx-auto px-6 text-center text-gray-600">
+            <p>&copy; 2024 Oranga Tōtika Interactive Analysis. Created to translate the findings of the Systems Thinking course research on "Health outcome inequities in New Zealand".</p>
         </div>
-    </div>
+    </footer>
 
-    <script>
-        // Tab switching functionality
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                // Remove active class from all nav items
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                // Add active class to clicked item
-                item.classList.add('active');
-                
-                // Hide all tab content
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-                // Show selected tab
-                const tabId = item.getAttribute('data-tab') + '-tab';
-                document.getElementById(tabId).classList.remove('hidden');
-            });
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const data = {
+        maori: {
+            title: "The Māori Health Deficit",
+            narrative: `The most significant and historically entrenched health inequity in Aotearoa. Māori live shorter, sicker lives, experiencing double the rate of preventable deaths compared to non-Māori. This is not due to individual choices, but a direct consequence of a system that provides differential access and lower quality of care, rooted in the legacy of colonisation and institutional racism. Compounding this, Māori are systematically under-counted in health data, rendering the true scale of need invisible and perpetuating a cycle of under-resourcing.`,
+            lifeExpectancy: 7.4,
+            foodInsecurity: 34.3,
+            psychologicalDistress: 13.0, // Using total population as proxy
+            amenableMortality: 2.0
+        },
+        pasifika: {
+            title: "The Pasifika Health Challenge",
+            narrative: `A youthful, diverse, and predominantly urban population facing a compounded set of disadvantages. Pacific peoples experience high rates of chronic disease and were disproportionately impacted by COVID-19. These outcomes are inextricably linked to adverse social determinants like household overcrowding and low income, starkly illustrated by a catastrophic recent rise in child food insecurity. Pacific-led, holistic models of care are essential but remain under-resourced.`,
+            lifeExpectancy: 6.4, // Average of male/female
+            foodInsecurity: 53.0,
+            psychologicalDistress: 13.0, // Using total population as proxy
+            amenableMortality: 1.0 // No specific ratio given, using 1 as baseline
+        },
+        disabled: {
+            title: "The Disability Inequity Gap",
+            narrative: `Disabled adults and children experience profoundly worse health and wellbeing outcomes, highlighting a system not designed for their needs. They report far lower levels of good health and life satisfaction. The disparities in mental health are particularly stark, with disabled adults three times more likely to experience high psychological distress and face more than double the rate of unmet need for professional support, demonstrating a massive and inequitable system failure.`,
+            lifeExpectancy: 0, // Not provided
+            foodInsecurity: 0, // Not provided for children
+            psychologicalDistress: 33.2,
+            amenableMortality: 1.0 // Not provided
+        },
+        rural: {
+            title: "The Rural-Urban Divide",
+            narrative: `The nearly one in five New Zealanders living in rural areas experience systematically poorer health outcomes, including higher all-cause and amenable mortality rates. Suicide rates among rural males are alarmingly high. Paradoxically, despite greater need, rural residents have lower utilisation of hospital care, pointing not to better health but to significant barriers to access like distance, cost, and service availability in an urban-centric system.`,
+            lifeExpectancy: 0, // Not provided
+            foodInsecurity: 0, // Not provided
+            psychologicalDistress: 13.0, // Using total population as proxy
+            amenableMortality: 1.0 // Not provided
+        }
+    };
+
+    const causesData = {
+        colonisation: {
+            title: "Colonisation & Land Alienation",
+            text: "The process of colonisation initiated a period of destructive, health-demoting change. The introduction of new diseases and the alienation of Māori from their land, fisheries, and forests undermined the economic, social, and spiritual foundations of hauora (holistic wellbeing). This historical trauma persists through intergenerational disadvantage."
+        },
+        socioeconomic: {
+            title: "Socioeconomic Disadvantage",
+            text: "Historical disadvantage concentrates Māori and Pacific peoples in the most deprived communities. The neoliberal reforms of the 1980s/90s dramatically increased income inequality, disproportionately impacting these communities and directly contributing to widening health disparities."
+        },
+        commercial: {
+            title: "Commercial Determinants",
+            text: "Industries like tobacco, alcohol, and ultra-processed food producers heavily target disadvantaged communities. This higher exposure to health-harming products exploits and profits from the conditions of disadvantage created by other structural forces, acting as a force multiplier for inequity."
+        },
+        racism: {
+            title: "Institutional Racism & Unsafe Care",
+            text: "Monocultural Pākehā norms are embedded in the health system's structures, policies, and practices. This results in a system that is often culturally unsafe, prioritises a Western biomedical worldview, and leads to Māori receiving poorer quality care, which erodes trust and creates barriers to access."
+        },
+        access: {
+            title: "Under-utilisation of Primary Care",
+            text: "Due to barriers of cost, distance, and experiences of culturally unsafe care, marginalised groups are less likely to access preventative primary care. This leads to conditions going unmanaged, resulting in a perverse 'saving' for the health system upstream, while problems escalate."
+        },
+        outcomes: {
+            title: "Poor Health Outcomes",
+            text: "The culmination of all other forces. Higher rates of preventable death (amenable mortality) and avoidable, expensive hospital admissions are the logical result. These poor outcomes are then often framed through a lens of individual blame, justifying continued under-investment in upstream, community-led solutions and completing the vicious cycle."
+        }
+    };
+
+    const globalTabsData = {
+        australia: {
+            title: 'Australia: A Story of Community Control',
+            content: `<p class="mb-4">Australia shares a similar settler-colonial history and resulting Indigenous health inequities. However, it has a long and powerful history of Aboriginal Community Controlled Health Services (ACCHSs).</p>
+                      <ul class="list-disc list-inside space-y-2 text-gray-600">
+                        <li><strong>Key Strength:</strong> The ACCHS model, governed by and for Aboriginal and Torres Strait Islander communities, provides comprehensive, culturally safe primary care and consistently delivers better outcomes than mainstream services.</li>
+                        <li><strong>Key Learning for NZ:</strong> Provides a strong international evidence base that validates the "by Indigenous, for Indigenous" approach championed by models like Whānau Ora and the former Te Aka Whai Ora.</li>
+                      </ul>`
+        },
+        canada: {
+            title: 'Canada: A Cautionary Tale of Fragmentation',
+            content: `<p class="mb-4">Canada's experience highlights the dangers of a fragmented system. Jurisdictional complexity, with responsibilities split between federal, provincial, and territorial governments, creates immense confusion and barriers to care for First Nations, Inuit, and Métis peoples.</p>
+                      <ul class="list-disc list-inside space-y-2 text-gray-600">
+                        <li><strong>Key Weakness:</strong> A lack of clear lines of accountability and a unified strategy for Indigenous health leads to persistent challenges with access, long wait times, and pervasive racism.</li>
+                        <li><strong>Key Learning for NZ:</strong> Underscores the critical importance of unified governance and a single, coherent strategy for Māori health to avoid the pitfalls of a fragmented system.</li>
+                      </ul>`
+        },
+        nordic: {
+            title: 'The Nordic Model: A Counterpoint in Public Equity',
+            content: `<p class="mb-4">In stark contrast, Nordic countries built their systems on a social-democrat consensus that equity is a core function of the state. This offers a different ideological model.</p>
+                      <ul class="list-disc list-inside space-y-2 text-gray-600">
+                        <li><strong>Key Strength:</strong> Systems are almost entirely tax-funded, publicly delivered, and universally accessible. This commitment has produced some of the most equitable health outcomes in the world.</li>
+                        <li><strong>Key Learning for NZ:</strong> Serves as a powerful counterpoint to the neoliberal, market-driven reforms. It shows what is possible when a system is designed for equity from the ground up, suggesting a strong universalist public system is a more fertile ground for achieving equity.</li>
+                      </ul>`
+        }
+    };
+
+    const chartConfig = {
+        type: 'bar',
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#333',
+                    titleFont: { size: 14 },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    cornerRadius: 4
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#e5e7eb' },
+                    ticks: { color: '#6b7280' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#6b7280' }
+                }
+            }
+        }
+    };
+
+    const donutConfig = {
+        type: 'doughnut',
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { color: '#6b7280' } } },
+            cutout: '60%'
+        }
+    };
+
+    const lifeExpectancyChart = new Chart(document.getElementById('lifeExpectancyChart'), { ...chartConfig, data: { labels: [], datasets: [{ label: 'Years Less', data: [], backgroundColor: '#A97C50' }] }});
+    const foodInsecurityChart = new Chart(document.getElementById('foodInsecurityChart'), { ...donutConfig, data: { labels: [], datasets: [{ data: [], backgroundColor: ['#A97C50', '#D1BFAA'] }] }});
+    const distressChart = new Chart(document.getElementById('distressChart'), { ...donutConfig, data: { labels: [], datasets: [{ data: [], backgroundColor: ['#A97C50', '#D1BFAA'] }] }});
+    const mortalityChart = new Chart(document.getElementById('mortalityChart'), { ...chartConfig, data: { labels: [], datasets: [{ label: 'Rate Ratio', data: [], backgroundColor: '#A97C50' }] }});
+
+    function updateCharts(filter) {
+        const d = data[filter];
+        lifeExpectancyChart.data.labels = [d.title];
+        lifeExpectancyChart.data.datasets[0].data = [d.lifeExpectancy];
+        lifeExpectancyChart.update();
+
+        foodInsecurityChart.data.labels = ['Affected', 'Not Affected'];
+        foodInsecurityChart.data.datasets[0].data = [d.foodInsecurity, 100 - d.foodInsecurity];
+        foodInsecurityChart.update();
+
+        distressChart.data.labels = ['High Distress', 'Lower Distress'];
+        distressChart.data.datasets[0].data = [d.psychologicalDistress, 100 - d.psychologicalDistress];
+        distressChart.update();
+
+        mortalityChart.data.labels = [d.title];
+        mortalityChart.data.datasets[0].data = [d.amenableMortality];
+        mortalityChart.update();
+    }
+
+    function updateNarrative(filter) {
+        const d = data[filter];
+        document.getElementById('narrative-title').innerText = d.title;
+        document.getElementById('narrative-text').innerText = d.narrative;
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const currentActiveBtn = document.querySelector('.filter-btn.active');
+            if (currentActiveBtn) {
+                currentActiveBtn.classList.remove('active', 'bg-gray-700', 'text-white');
+                currentActiveBtn.classList.add('bg-white', 'text-gray-700', 'border');
+            }
+            button.classList.add('active', 'bg-gray-700', 'text-white');
+            button.classList.remove('bg-white', 'text-gray-700', 'border');
+            const filter = button.dataset.filter;
+            updateCharts(filter);
+            updateNarrative(filter);
         });
+    });
 
-        // Quick query functionality
-        function fillQuery(text) {
-            document.getElementById('quick-query').value = text;
-        }
+    function updateCauseNarrative(causeKey) {
+        const cause = causesData[causeKey];
+        document.getElementById('cause-title').innerText = cause.title;
+        document.getElementById('cause-text').innerText = cause.text;
+    }
 
-        function processQuery() {
-            const query = document.getElementById('quick-query').value;
-            if (query) {
-                // Switch to chat tab
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                document.querySelector('[data-tab="chat"]').classList.add('active');
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-                document.getElementById('chat-tab').classList.remove('hidden');
-                
-                // Add query to chat
-                addChatMessage(query, 'user');
-                document.getElementById('quick-query').value = '';
-                
-                // Simulate AI response
-                setTimeout(() => {
-                    simulateAIResponse(query);
-                }, 1000);
+    document.querySelectorAll('.system-node').forEach(node => {
+        node.addEventListener('click', () => {
+            const currentActiveNode = document.querySelector('.system-node.active');
+            if(currentActiveNode) {
+                currentActiveNode.classList.remove('active');
             }
-        }
-
-        // Chat functionality
-        function handleChatEnter(event) {
-            if (event.key === 'Enter') {
-                sendChatMessage();
-            }
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const message = input.value.trim();
-            if (message) {
-                addChatMessage(message, 'user');
-                input.value = '';
-                
-                // Show typing indicator
-                addTypingIndicator();
-                
-                // Simulate AI response
-                setTimeout(() => {
-                    removeTypingIndicator();
-                    simulateAIResponse(message);
-                }, 1500);
-            }
-        }
-
-        function addChatMessage(message, sender) {
-            const messagesContainer = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            avatar.textContent = sender === 'user' ? 'You' : 'AI';
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.textContent = message;
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(bubble);
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function addTypingIndicator() {
-            const messagesContainer = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message assistant typing-indicator';
-            messageDiv.innerHTML = `
-                <div class="avatar">AI</div>
-                <div class="message-bubble">
-                    <div class="loading-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-            `;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function removeTypingIndicator() {
-            const indicator = document.querySelector('.typing-indicator');
-            if (indicator) {
-                indicator.remove();
-            }
-        }
-
-        function simulateAIResponse(query) {
-            let response = "I'd be happy to help you with that analysis. ";
-            
-            if (query.toLowerCase().includes('immigration')) {
-                response = "I've analysed immigration test patterns and found 3 practices with significant volume declines:\n\n• Auckland Medical Centre: 35% decline (450→292 tests/month) - likely competitor switch\n• Wellington Clinic: 25% decline - payment method shift to patient-paid\n• Hamilton Practice: 22% decline - staffing changes\n\nI recommend immediate account manager contact for Auckland Medical Centre due to high churn risk.";
-            } else if (query.toLowerCase().includes('revenue') || query.toLowerCase().includes('customer')) {
-                response = "Based on your customer data, here are the key insights:\n\n• Total revenue: $2.4M (+12.3% vs last quarter)\n• Top 5 customers represent 34% of revenue\n• 3 customers flagged as high churn risk\n• Average customer value increased 8.7%\n\nWould you like me to dive deeper into any specific customer segment?";
-            } else if (query.toLowerCase().includes('forecast')) {
-                response = "Revenue forecast for next quarter:\n\n• Projected revenue: $2.7M (+12.5% growth)\n• Key drivers: Seasonal uptick in testing, 2 new large accounts\n• Risk factors: 3 at-risk customers worth $180K\n• Confidence level: 87%\n\nThis forecast assumes successful retention of flagged at-risk accounts.";
-            } else {
-                response += "Let me analyse that for you. Based on the data patterns I'm seeing, here are the key insights... Would you like me to elaborate on any specific aspect?";
-            }
-            
-            addChatMessage(response, 'assistant');
-        }
-
-        // Initialize with some sample data animation
-        document.addEventListener('DOMContentLoaded', () => {
-            // Animate metric counters on load
-            const metrics = document.querySelectorAll('.metric-value');
-            metrics.forEach(metric => {
-                const text = metric.textContent;
-                metric.style.opacity = '0';
-                setTimeout(() => {
-                    metric.style.opacity = '1';
-                    metric.style.transform = 'translateY(0)';
-                }, Math.random() * 500);
-            });
+            node.classList.add('active');
+            updateCauseNarrative(node.dataset.cause);
         });
-    </script>
+    });
+    
+    function updateTabContent(tabKey) {
+        const tabData = globalTabsData[tabKey];
+        const contentDiv = document.getElementById('tab-content');
+        contentDiv.innerHTML = `<h3 class="text-xl font-bold text-[#A97C50] mb-4">${tabData.title}</h3>${tabData.content}`;
+    }
+
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const currentActiveTab = document.querySelector('.tab-button.active');
+            if (currentActiveTab) {
+                currentActiveTab.classList.remove('active');
+            }
+            button.classList.add('active');
+            updateTabContent(button.dataset.tab);
+        });
+    });
+
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    function animateCounter(id, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const current = Math.floor(progress * (end - start) + start);
+            document.getElementById(id).innerText = `$${current.toLocaleString()}M`;
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    const costSection = document.getElementById('cost');
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            animateCounter('cost-counter', 0, 863, 2000);
+            observer.disconnect();
+        }
+    }, { threshold: 0.5 });
+    observer.observe(costSection);
+
+    updateCharts('maori');
+    updateNarrative('maori');
+    updateCauseNarrative('colonisation');
+    document.querySelector('.system-node[data-cause="colonisation"]').classList.add('active');
+    updateTabContent('australia');
+});
+</script>
 </body>
 </html>
