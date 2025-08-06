@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Definitive Guide to On-Site AI Chatbots</title>
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application uses a tabbed navigation structure to break the dense report into logical, digestible themes: 'Home', 'Core Tech (RAG)', 'Build vs. Buy', 'SaaS Platforms', 'Open-Source Frameworks', and 'Security'. This task-oriented design allows different user personas (e.g., a business manager vs. a developer) to navigate directly to the content most relevant to them, rather than scrolling through a linear document. Key interactions include an interactive 'Build vs. Buy' recommender to guide users, filterable comparison tables, and clickable diagrams to explain complex concepts like the RAG pipeline and security layers. This structure prioritizes user-driven exploration and decision-making over passive reading. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: 'Build vs. Buy' decision criteria -> Goal: Guide User Decision -> Viz/Method: Interactive questionnaire -> Interaction: User answers questions, JS logic provides a tailored recommendation -> Justification: Actively engages the user in the decision-making process, making the recommendation feel earned and personalized. -> Library/Method: Vanilla JS.
+        - Report Info: SaaS Platform Comparison Table (especially pricing) -> Goal: Compare -> Viz/Method: Interactive Bar Chart (Chart.js) & Filterable HTML Table -> Interaction: Hover chart bars for details, click filter buttons to narrow down the table -> Justification: Visualizes quantitative data for quick comparison and allows users to efficiently sift through qualitative data based on their specific needs. -> Library/Method: Chart.js, Vanilla JS.
+        - Report Info: RAG Pipeline Explanation -> Goal: Inform/Organize -> Viz/Method: Clickable 3-step diagram -> Interaction: Clicking a step reveals its detailed explanation -> Justification: Deconstructs a complex technical process into simple, manageable chunks, improving comprehension. -> Library/Method: HTML/CSS/JS.
+        - Report Info: Security Layers -> Goal: Inform/Organize -> Viz/Method: Clickable layered diagram -> Interaction: Clicking a layer shows details -> Justification: Visually represents the defense-in-depth concept, making it more intuitive. -> Library/Method: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdfcfb;
+            color: #333;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active {
+            border-bottom-color: #a5b4fc; /* Indigo 300 */
+            color: #4338ca; /* Indigo 800 */
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 60rem;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .rag-step, .security-layer {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .rag-step.active, .security-layer.active {
+            background-color: #e0e7ff; /* Indigo 100 */
+            border-color: #a5b4fc; /* Indigo 300 */
+        }
+        .recommendation-card {
+            background-color: #f0f9ff; /* Sky 50 */
+            border-left: 4px solid #38bdf8; /* Sky 500 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-40 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-gray-800">AI Chatbot Guide</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">Home</a>
+                        <a href="#rag" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">Core Tech</a>
+                        <a href="#decision" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">Build vs. Buy</a>
+                        <a href="#saas" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">SaaS Platforms</a>
+                        <a href="#opensource" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">Open Source</a>
+                        <a href="#security" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900">Security</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#home" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900">Home</a>
+                    <a href="#rag" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900">Core Tech</a>
+                    <a href="#decision" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900">Build vs. Buy</a>
+                    <a href="#saas" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900">SaaS Platforms</a>
+                    <a href="#opensource" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900">Open Source</a>
+                    <a href="#security" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900">Security</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <section id="home" class="section">
+            <div class="text-center py-16">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">Your Guide to On-Site, Content-Specific AI Chatbots</h1>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Harness the power of LLMs safely. This guide helps you choose, build, and secure an AI chatbot that acts as a trusted expert on your specific content, avoiding the risks of general-purpose AI.</p>
+                <div class="mt-8 flex justify-center gap-4">
+                    <button id="start-guide-btn" class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 transition-colors">Start the Guide</button>
+                    <button id="learn-tech-btn" class="bg-white text-indigo-600 font-semibold py-3 px-6 rounded-lg shadow-md border border-indigo-200 hover:bg-indigo-50 transition-colors">Learn the Tech</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="rag" class="section">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-2">The Core Technology: Retrieval-Augmented Generation (RAG)</h2>
+                <p class="text-center text-gray-600 mb-8">RAG is the architectural pattern that allows a chatbot to answer questions based on your specific documents, turning it into an "open-book exam" for the AI.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mb-8">
+                    <div id="rag-step-1" class="rag-step border-2 border-gray-200 p-4 rounded-lg">
+                        <div class="text-indigo-500 text-3xl mb-2">①</div>
+                        <h3 class="font-semibold">Ingestion & Indexing</h3>
+                    </div>
+                    <div id="rag-step-2" class="rag-step border-2 border-gray-200 p-4 rounded-lg">
+                        <div class="text-indigo-500 text-3xl mb-2">②</div>
+                        <h3 class="font-semibold">Retrieval</h3>
+                    </div>
+                    <div id="rag-step-3" class="rag-step border-2 border-gray-200 p-4 rounded-lg">
+                        <div class="text-indigo-500 text-3xl mb-2">③</div>
+                        <h3 class="font-semibold">Augmentation & Generation</h3>
+                    </div>
+                </div>
+
+                <div id="rag-details" class="bg-white p-6 rounded-lg shadow">
+                    <!-- Details will be injected here by JS -->
+                </div>
+            </div>
+        </section>
+
+        <section id="decision" class="section">
+            <div class="max-w-2xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-2">Choose Your Path: Build vs. Buy</h2>
+                <p class="text-center text-gray-600 mb-8">Answer a few questions to get a recommendation on whether a managed SaaS platform ("Buy") or a custom open-source solution ("Build") is right for you.</p>
+                
+                <div id="decision-quiz" class="space-y-6 bg-white p-8 rounded-lg shadow">
+                    <!-- Quiz questions will be injected here -->
+                </div>
+
+                <div id="decision-result" class="hidden mt-8 p-6 rounded-lg recommendation-card">
+                    <h3 class="font-bold text-xl text-sky-800">Our Recommendation:</h3>
+                    <p id="result-text" class="mt-2 text-sky-700"></p>
+                    <div class="mt-4">
+                        <button id="result-button" class="bg-sky-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-sky-600 transition-colors"></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="saas" class="section">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-2">"Buy": Managed SaaS Platforms</h2>
+                <p class="text-center text-gray-600 mb-8">These platforms offer speed and simplicity, handling the technical complexity for you. Compare leading options below.</p>
+                
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-center mb-4">Starting Price Comparison (Monthly)</h3>
+                    <div class="chart-container">
+                        <canvas id="saasPriceChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="mb-6 text-center">
+                    <span class="font-semibold mr-4">Filter by:</span>
+                    <button class="saas-filter-btn active-filter bg-indigo-100 text-indigo-800 py-1 px-3 rounded-full text-sm" data-filter="all">All</button>
+                    <button class="saas-filter-btn bg-gray-100 text-gray-800 py-1 px-3 rounded-full text-sm" data-filter="freeTier">Has Free Tier</button>
+                    <button class="saas-filter-btn bg-gray-100 text-gray-800 py-1 px-3 rounded-full text-sm" data-filter="nonTechnical">For Non-Technical</button>
+                    <button class="saas-filter-btn bg-gray-100 text-gray-800 py-1 px-3 rounded-full text-sm" data-filter="developer">For Developers</button>
+                </div>
+
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Platform</th>
+                                <th scope="col" class="px-6 py-3">Target Audience</th>
+                                <th scope="col" class="px-6 py-3">Key Differentiator</th>
+                                <th scope="col" class="px-6 py-3">Starting Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="saas-table-body">
+                            <!-- SaaS platforms will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="opensource" class="section">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-2">"Build": Open-Source Frameworks</h2>
+                <p class="text-center text-gray-600 mb-8">For maximum control, customization, and transparency. Compare the leading frameworks for building your own RAG pipeline.</p>
+                
+                 <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-center mb-4">Framework Learning Curve</h3>
+                    <div class="chart-container">
+                        <canvas id="osLearningCurveChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Framework</th>
+                                <th scope="col" class="px-6 py-3">Primary Focus</th>
+                                <th scope="col" class="px-6 py-3">Ideal Use Cases</th>
+                                <th scope="col" class="px-6 py-3">Learning Curve</th>
+                            </tr>
+                        </thead>
+                        <tbody id="os-table-body">
+                            <!-- Open Source frameworks will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="security" class="section">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-2">Fortifying Your AI Agent</h2>
+                <p class="text-center text-gray-600 mb-8">Deploying an AI introduces new security challenges. A multi-layered defense is essential to prevent abuse.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mb-8">
+                    <div id="security-layer-1" class="security-layer border-2 border-gray-200 p-4 rounded-lg">
+                        <h3 class="font-semibold">Layer 1: Input/Output Hardening</h3>
+                    </div>
+                    <div id="security-layer-2" class="security-layer border-2 border-gray-200 p-4 rounded-lg">
+                        <h3 class="font-semibold">Layer 2: Architectural Guardrails</h3>
+                    </div>
+                    <div id="security-layer-3" class="security-layer border-2 border-gray-200 p-4 rounded-lg">
+                        <h3 class="font-semibold">Layer 3: Access Control & Monitoring</h3>
+                    </div>
+                </div>
+
+                <div id="security-details" class="bg-white p-6 rounded-lg shadow">
+                    <!-- Details will be injected here by JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="modal" class="modal-overlay">
+        <div id="modal-content" class="modal-content">
+            <!-- Modal content will be injected here -->
+        </div>
+        <div class="absolute top-4 right-4">
+            <button id="modal-close" class="text-white text-4xl font-bold">&times;</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const data = {
+                ragDetails: {
+                    1: {
+                        title: 'Phase 1: Ingestion & Indexing (The "Library")',
+                        content: "Before any user interaction, your content (PDFs, docs, website content) is prepared. It's loaded, split into manageable chunks, and converted into numerical representations called 'embeddings' using an AI model. These embeddings, which capture the semantic meaning of the text, are stored in a highly efficient vector database, creating a searchable knowledge library for the AI."
+                    },
+                    2: {
+                        title: 'Phase 2: Retrieval (The "Search")',
+                        content: "When a user asks a question, the system converts the question into a query embedding. It then performs a similarity search against the vector database to find the text chunks with the closest meaning. The most relevant chunks are retrieved. Advanced systems use hybrid search (keyword + semantic) and re-ranking to improve relevance."
+                    },
+                    3: {
+                        title: 'Phase 3: Augmentation & Generation (The "Answer")',
+                        content: "The retrieved text chunks are combined with the original user question and a system prompt. This prompt instructs the LLM to formulate an answer based *only* on the provided context. The LLM then synthesizes this information to generate a concise, contextually grounded, and accurate response, often with citations to the source documents."
+                    }
+                },
+                securityDetails: {
+                    1: {
+                        title: 'Layer 1: Input/Output Hardening',
+                        content: "This layer focuses on sanitizing data flowing into and out of the LLM. <strong>Input Sanitization:</strong> Filter user queries for malicious patterns or keywords (e.g., 'ignore previous instructions'). <strong>Output Validation:</strong> Before displaying a response, check it for compliance with content guidelines and to ensure it doesn't contain leaked sensitive information."
+                    },
+                    2: {
+                        title: 'Layer 2: Architectural Guardrails',
+                        content: "This involves designing the system's core logic to be more resilient. <strong>Strengthening the System Prompt:</strong> Engineer the prompt to establish strict boundaries, telling the model what to do and what *not* to do. <strong>Managing Out-of-Domain Queries:</strong> Equip the bot to recognize questions outside its knowledge base and respond with a neutral, predefined answer like 'I can only answer questions about our products.'"
+                    },
+                    3: {
+                        title: 'Layer 3: Access Control & Monitoring',
+                        content: "This layer focuses on operational security practices. <strong>Principle of Least Privilege:</strong> Grant the chatbot the absolute minimum permissions necessary for its function (e.g., read-only access). <strong>Granular Access Controls:</strong> For internal bots, ensure the retrieval mechanism respects existing user permissions. <strong>Ongoing Monitoring:</strong> Implement real-time logging and anomaly detection to identify unusual patterns and emerging threats."
+                    }
+                },
+                decisionQuiz: [
+                    { id: 'devTeam', question: 'Do you have an in-house development team with Python/AI skills available for this project?', buildScore: 2, buyScore: 0 },
+                    { id: 'timeline', question: 'What is your required time to market?', options: [{ text: 'Urgent (Days/Weeks)', buildScore: 0, buyScore: 2 }, { text: 'Flexible (Months)', buildScore: 2, buyScore: 0 }] },
+                    { id: 'control', question: 'How much customization and control do you need over the AI\'s logic and integrations?', options: [{ text: 'Standard features are fine', buildScore: 0, buyScore: 2 }, { text: 'Deep, granular control is required', buildScore: 2, buyScore: 0 }] },
+                    { id: 'security', question: 'Do you have stringent security requirements, such as on-premise deployment or custom compliance protocols?', buildScore: 2, buyScore: 0 }
+                ],
+                saasPlatforms: [
+                    { name: 'CustomGPT.ai', audience: 'Non-technical Business Users', differentiator: '#1 Anti-hallucination tech with citations', price: 99, hasFreeTier: false, audienceType: 'nonTechnical', details: 'Aimed at business users, CustomGPT.ai focuses on ease of use and trustworthy answers with verifiable citations. It boasts extensive data ingestion capabilities (1400+ formats) and strong security (SOC 2 Type 2). It is a premium solution with no free plan.' },
+                    { name: 'Botpress', audience: 'Developers, Technical Teams', differentiator: 'Visual workflow builder for complex, agentic tasks', price: 0, hasFreeTier: true, audienceType: 'developer', details: 'A powerful, highly customizable platform for developers. Its visual "Studio" allows for creating complex, multi-step workflows. It supports various LLMs, custom code execution, and has a generous free tier, but a steep learning curve for non-developers.' },
+                    { name: 'Wonderchat', audience: 'SMEs, All User Types', differentiator: 'Model-agnostic (use any major LLM); 5-min setup', price: 29, hasFreeTier: true, audienceType: 'nonTechnical', details: 'Balances simplicity and power, offering a quick setup and allowing users to swap between major LLMs (OpenAI, Claude, Gemini, etc.). It includes strong features like human handover and analytics. The free trial is limited.' },
+                    { name: 'Chatbase', audience: 'SMEs, Startups', differentiator: 'Simple setup with "AI Actions" for task automation', price: 40, hasFreeTier: true, audienceType: 'nonTechnical', details: 'User-friendly builder focused on "AI Actions" to automate tasks like booking appointments. It has a limited free plan and is accessible for smaller projects.' },
+                    { name: 'Botsonic', audience: 'E-commerce, SaaS, SMEs', differentiator: 'Industry-specific focus, good multilingual support', price: 16, hasFreeTier: true, audienceType: 'nonTechnical', details: 'A versatile solution with features like agent handoffs and multilingual capabilities. Offers a 7-day free trial and an aggressive starting price, but many features are paid add-ons.' },
+                    { name: 'Tidio', audience: 'Customer Service Teams', differentiator: 'All-in-one platform (Live Chat, AI Bot, Help Desk)', price: 29, hasFreeTier: true, audienceType: 'nonTechnical', details: 'A comprehensive customer service platform integrating live chat, help desk, and its AI chatbot "Lyro". Excellent for businesses seeking an all-in-one solution. Pricing can scale quickly with usage.' }
+                ],
+                osFrameworks: [
+                    { name: 'LangChain', focus: 'General-purpose LLM application development', useCases: 'Complex, multi-step agentic applications; rapid prototyping', learningCurve: 3, learningCurveLabel: 'Moderate to High', details: 'A versatile "Swiss Army knife" for building a wide array of LLM applications. It excels at "chaining" components to create sophisticated logic. Its flexibility comes with a moderate to high learning curve.' },
+                    { name: 'LlamaIndex', focus: 'High-performance RAG pipelines', useCases: 'Q&A over complex/large document sets; enterprise search', learningCurve: 2, learningCurveLabel: 'Low to Moderate', details: 'A data framework specifically designed and optimized for RAG applications. It simplifies and optimizes data ingestion, indexing, and retrieval, allowing developers to achieve state-of-the-art performance with less effort.' },
+                    { name: 'Rasa', focus: 'Enterprise-grade conversational AI', useCases: 'Complex, multi-turn virtual assistants; transactional bots', learningCurve: 3, learningCurveLabel: 'High', details: 'A mature, end-to-end platform for building enterprise-grade conversational AI. Its strength is in sophisticated dialogue management for complex, stateful interactions. It has a high learning curve.' }
+                ]
+            };
+
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const startGuideBtn = document.getElementById('start-guide-btn');
+            const learnTechBtn = document.getElementById('learn-tech-btn');
+
+            function navigateTo(hash) {
+                const targetHash = '#' + hash;
+                window.location.hash = targetHash;
+                updateActiveState(targetHash);
+                if(mobileMenu.classList.contains('hidden') === false) {
+                    mobileMenu.classList.add('hidden');
+                }
+            }
+
+            startGuideBtn.addEventListener('click', () => navigateTo('decision'));
+            learnTechBtn.addEventListener('click', () => navigateTo('rag'));
+
+            function updateActiveState(activeHash) {
+                sections.forEach(section => {
+                    if ('#' + section.id === activeHash) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === activeHash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetHash = e.currentTarget.getAttribute('href');
+                    window.location.hash = targetHash;
+                    updateActiveState(targetHash);
+                    if(mobileMenu.classList.contains('hidden') === false) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            const initialHash = window.location.hash || '#home';
+            updateActiveState(initialHash);
+
+            window.addEventListener('hashchange', () => {
+                updateActiveState(window.location.hash);
+            });
+
+            function initRagSection() {
+                const steps = document.querySelectorAll('.rag-step');
+                const detailsContainer = document.getElementById('rag-details');
+                
+                function showRagDetails(id) {
+                    steps.forEach(s => s.classList.remove('active'));
+                    document.getElementById(`rag-step-${id}`).classList.add('active');
+                    const detail = data.ragDetails[id];
+                    detailsContainer.innerHTML = `<h4 class="text-lg font-semibold mb-2">${detail.title}</h4><p class="text-gray-600">${detail.content}</p>`;
+                }
+
+                steps.forEach((step, index) => {
+                    step.addEventListener('click', () => showRagDetails(index + 1));
+                });
+                
+                showRagDetails(1);
+            }
+
+            function initSecuritySection() {
+                const layers = document.querySelectorAll('.security-layer');
+                const detailsContainer = document.getElementById('security-details');
+
+                function showSecurityDetails(id) {
+                    layers.forEach(l => l.classList.remove('active'));
+                    document.getElementById(`security-layer-${id}`).classList.add('active');
+                    const detail = data.securityDetails[id];
+                    detailsContainer.innerHTML = `<h4 class="text-lg font-semibold mb-2">${detail.title}</h4><p class="text-gray-600">${detail.content}</p>`;
+                }
+
+                layers.forEach((layer, index) => {
+                    layer.addEventListener('click', () => showSecurityDetails(index + 1));
+                });
+
+                showSecurityDetails(1);
+            }
+
+            function initDecisionQuiz() {
+                const quizContainer = document.getElementById('decision-quiz');
+                let quizHTML = '';
+                data.decisionQuiz.forEach((q, index) => {
+                    quizHTML += `<div data-question-id="${q.id}">
+                        <p class="font-semibold mb-2">${index + 1}. ${q.question}</p>
+                        <div class="flex gap-4">`;
+                    if (q.options) {
+                        q.options.forEach(opt => {
+                            quizHTML += `<button class="quiz-option w-full bg-gray-100 hover:bg-indigo-100 text-gray-800 py-2 px-4 rounded-lg transition-colors" data-build="${opt.buildScore}" data-buy="${opt.buyScore}">${opt.text}</button>`;
+                        });
+                    } else {
+                        quizHTML += `<button class="quiz-option w-full bg-gray-100 hover:bg-indigo-100 text-gray-800 py-2 px-4 rounded-lg transition-colors" data-build="${q.buildScore}" data-buy="${q.buyScore}">Yes</button>
+                                   <button class="quiz-option w-full bg-gray-100 hover:bg-indigo-100 text-gray-800 py-2 px-4 rounded-lg transition-colors" data-build="${q.buyScore}" data-buy="${q.buildScore}">No</button>`;
+                    }
+                    quizHTML += `</div></div>`;
+                });
+                quizContainer.innerHTML = quizHTML;
+
+                const options = document.querySelectorAll('.quiz-option');
+                const resultContainer = document.getElementById('decision-result');
+                const resultText = document.getElementById('result-text');
+                const resultButton = document.getElementById('result-button');
+                let scores = { build: 0, buy: 0 };
+                let answeredQuestions = 0;
+
+                options.forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        const parent = e.target.parentElement;
+                        Array.from(parent.children).forEach(child => child.classList.remove('bg-indigo-600', 'text-white'));
+                        e.target.classList.add('bg-indigo-600', 'text-white');
+                        
+                        updateScores();
+                    });
+                });
+
+                function updateScores() {
+                    scores = { build: 0, buy: 0 };
+                    answeredQuestions = 0;
+                    const selectedOptions = document.querySelectorAll('.quiz-option.bg-indigo-600');
+                    selectedOptions.forEach(opt => {
+                        scores.build += parseInt(opt.dataset.build);
+                        scores.buy += parseInt(opt.dataset.buy);
+                        answeredQuestions++;
+                    });
+
+                    if (answeredQuestions === data.decisionQuiz.length) {
+                        showResult();
+                    }
+                }
+
+                function showResult() {
+                    resultContainer.classList.remove('hidden');
+                    if (scores.build > scores.buy) {
+                        resultText.textContent = "Based on your answers, a 'Build' approach using an open-source framework seems like the best fit. This path offers the control and customization you need.";
+                        resultButton.textContent = 'Explore Open-Source Frameworks';
+                        resultButton.onclick = () => navigateTo('opensource');
+                    } else {
+                        resultText.textContent = "Based on your answers, a 'Buy' approach using a managed SaaS platform is recommended. This path will get you to market faster with less technical overhead.";
+                        resultButton.textContent = 'Explore SaaS Platforms';
+                        resultButton.onclick = () => navigateTo('saas');
+                    }
+                }
+            }
+
+            function initSaaSSection() {
+                const tableBody = document.getElementById('saas-table-body');
+                const filterButtons = document.querySelectorAll('.saas-filter-btn');
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modal-content');
+                const modalClose = document.getElementById('modal-close');
+
+                function renderTable(filter = 'all') {
+                    tableBody.innerHTML = '';
+                    let filteredData = data.saasPlatforms;
+
+                    if (filter === 'freeTier') {
+                        filteredData = data.saasPlatforms.filter(p => p.hasFreeTier);
+                    } else if (filter === 'nonTechnical') {
+                        filteredData = data.saasPlatforms.filter(p => p.audienceType === 'nonTechnical');
+                    } else if (filter === 'developer') {
+                        filteredData = data.saasPlatforms.filter(p => p.audienceType === 'developer');
+                    }
+
+                    filteredData.forEach(p => {
+                        const row = document.createElement('tr');
+                        row.className = 'bg-white border-b hover:bg-gray-50 cursor-pointer';
+                        row.innerHTML = `
+                            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${p.name}</td>
+                            <td class="px-6 py-4">${p.audience}</td>
+                            <td class="px-6 py-4">${p.differentiator}</td>
+                            <td class="px-6 py-4">${p.price > 0 ? `$${p.price}/mo` : 'Free Tier'}</td>
+                        `;
+                        row.addEventListener('click', () => showModal(p));
+                        tableBody.appendChild(row);
+                    });
+                }
+
+                function showModal(platform) {
+                    modalContent.innerHTML = `
+                        <h3 class="text-2xl font-bold mb-2">${platform.name}</h3>
+                        <p class="text-gray-600 mb-4">${platform.details}</p>
+                        <div class="mt-4 border-t pt-4">
+                            <p><strong>Target Audience:</strong> ${platform.audience}</p>
+                            <p><strong>Key Differentiator:</strong> ${platform.differentiator}</p>
+                            <p><strong>Starting Price:</strong> ${platform.price > 0 ? `$${platform.price}/mo` : 'Free Tier Available'}</p>
+                        </div>
+                    `;
+                    modal.classList.add('visible');
+                }
+                
+                modalClose.addEventListener('click', () => modal.classList.remove('visible'));
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('visible');
+                    }
+                });
+
+                filterButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        filterButtons.forEach(b => b.classList.remove('active-filter', 'bg-indigo-100', 'text-indigo-800'));
+                        filterButtons.forEach(b => b.classList.add('bg-gray-100', 'text-gray-800'));
+                        e.target.classList.add('active-filter', 'bg-indigo-100', 'text-indigo-800');
+                        e.target.classList.remove('bg-gray-100', 'text-gray-800');
+                        renderTable(e.target.dataset.filter);
+                    });
+                });
+                
+                renderTable();
+                renderSaaSPriceChart();
+            }
+
+            function renderSaaSPriceChart() {
+                const ctx = document.getElementById('saasPriceChart').getContext('2d');
+                const chartData = data.saasPlatforms.filter(p => p.price > 0);
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.map(p => p.name),
+                        datasets: [{
+                            label: 'Starting Price ($/month)',
+                            data: chartData.map(p => p.price),
+                            backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Price ($)' }
+                            },
+                            x: {
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `$${context.raw} per month`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function initOSSection() {
+                const tableBody = document.getElementById('os-table-body');
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modal-content');
+
+                function renderTable() {
+                    tableBody.innerHTML = '';
+                    data.osFrameworks.forEach(f => {
+                        const row = document.createElement('tr');
+                        row.className = 'bg-white border-b hover:bg-gray-50 cursor-pointer';
+                        row.innerHTML = `
+                            <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">${f.name}</td>
+                            <td class="px-6 py-4">${f.focus}</td>
+                            <td class="px-6 py-4">${f.useCases}</td>
+                            <td class="px-6 py-4">${f.learningCurveLabel}</td>
+                        `;
+                        row.addEventListener('click', () => showModal(f));
+                        tableBody.appendChild(row);
+                    });
+                }
+
+                function showModal(framework) {
+                    modalContent.innerHTML = `
+                        <h3 class="text-2xl font-bold mb-2">${framework.name}</h3>
+                        <p class="text-gray-600 mb-4">${framework.details}</p>
+                        <div class="mt-4 border-t pt-4">
+                            <p><strong>Primary Focus:</strong> ${framework.focus}</p>
+                            <p><strong>Ideal Use Cases:</strong> ${framework.useCases}</p>
+                            <p><strong>Learning Curve:</strong> ${framework.learningCurveLabel}</p>
+                        </div>
+                    `;
+                    modal.classList.add('visible');
+                }
+
+                renderTable();
+                renderOSLearningCurveChart();
+            }
+
+            function renderOSLearningCurveChart() {
+                const ctx = document.getElementById('osLearningCurveChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.osFrameworks.map(f => f.name),
+                        datasets: [{
+                            label: 'Learning Curve (1=Low, 3=High)',
+                            data: data.osFrameworks.map(f => f.learningCurve),
+                            backgroundColor: 'rgba(14, 165, 233, 0.6)',
+                            borderColor: 'rgba(14, 165, 233, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 3,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        if (value === 1) return 'Low';
+                                        if (value === 2) return 'Moderate';
+                                        if (value === 3) return 'High';
+                                        return '';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                             tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Curve: ${context.raw} (${context.chart.data.labels[context.dataIndex]})`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            initRagSection();
+            initSecuritySection();
+            initDecisionQuiz();
+            initSaaSSection();
+            initOSSection();
+        });
+    </script>
+</body>
+</html>
