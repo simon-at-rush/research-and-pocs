@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietnam Tertiary Education: An Interactive Analysis</title>
+    <!-- Chosen Palette: Warm Neutrals (Beige, Taupe, Soft Gray) with Teal Accent -->
+    <!-- Application Structure Plan: A single-page dashboard with a fixed sidebar navigation. This structure was chosen to provide users with a clear, persistent overview of the report's key themes (The Challenge, The Skills Gap, The Vision, The Future), allowing them to explore non-linearly. The dashboard approach is ideal for synthesizing quantitative data (charts, KPIs) and qualitative insights (text summaries) in a digestible format. Key interactions include tabbed content for detailed breakdowns and dynamic charts that visualize core metrics, promoting exploration over passive reading. -->
+    <!-- Visualization & Content Choices: 
+        - Enrollment Growth (Line Chart): Goal: Show change over time. Viz: Chart.js Line Chart. Interaction: Hover for details. Justification: Best for time-series data.
+        - Enrollment Share (Doughnut Chart): Goal: Show proportions. Viz: Chart.js Doughnut Chart. Interaction: Hover for percentages. Justification: Clear part-to-whole relationship for Public vs. Private.
+        - Popular Fields (Bar Chart): Goal: Compare categories. Viz: Chart.js Bar Chart. Interaction: Hover for exact numbers. Justification: Effectively compares discrete categories of study fields.
+        - Skills Gap (HTML/CSS Diagram): Goal: Organize qualitative data. Viz: Tailwind CSS grid with styled cards. Interaction: Static display. Justification: Clearly presents the mismatch between in-demand skills and curriculum focus without needing complex charts.
+        - Government KPIs (HTML/CSS Grid): Goal: Inform with key metrics. Viz: Styled cards. Interaction: Static display. Justification: Highlights specific, measurable targets in a scannable format.
+        - EdTech Market (Bar Chart): Goal: Compare growth metrics. Viz: Chart.js Bar Chart. Interaction: Hover for values. Justification: Simple, clear comparison of market size and investment.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8; /* Warm Beige */
+            color: #4A4A4A; /* Dark Gray */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            background-color: #008080; /* Teal */
+            color: white;
+            transform: translateX(4px);
+        }
+        .nav-link:not(.active):hover {
+            background-color: #EAE7E2; /* Lighter Taupe */
+            transform: translateX(4px);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 450px;
+        }
+        .kpi-card {
+            background-color: #FFFFFF;
+            border-left: 4px solid #008080; /* Teal */
+        }
+        .section-intro {
+            max-width: 48rem; /* 768px */
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-16 md:w-64 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-sm flex-shrink-0">
+            <div class="p-4 md:p-6 sticky top-0">
+                <h1 class="text-lg md:text-2xl font-bold text-[#008080] hidden md:block">Vietnam Education</h1>
+                <div class="mt-2 md:mt-0 md:hidden text-2xl font-bold text-[#008080]">🇻🇳</div>
+                <nav class="mt-8 space-y-2">
+                    <a href="#challenge" class="nav-link active flex items-center p-3 rounded-lg" onclick="showSection('challenge', this)">
+                        <span class="text-2xl">📉</span>
+                        <span class="ml-4 font-medium hidden md:inline">The Challenge</span>
+                    </a>
+                    <a href="#skills-gap" class="nav-link flex items-center p-3 rounded-lg" onclick="showSection('skills-gap', this)">
+                        <span class="text-2xl">🛠️</span>
+                        <span class="ml-4 font-medium hidden md:inline">The Skills Gap</span>
+                    </a>
+                    <a href="#vision" class="nav-link flex items-center p-3 rounded-lg" onclick="showSection('vision', this)">
+                        <span class="text-2xl">🎯</span>
+                        <span class="ml-4 font-medium hidden md:inline">The Vision 2045</span>
+                    </a>
+                    <a href="#future" class="nav-link flex items-center p-3 rounded-lg" onclick="showSection('future', this)">
+                        <span class="text-2xl">🚀</span>
+                        <span class="ml-4 font-medium hidden md:inline">The Future</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-10">
+            
+            <!-- Section 1: The Challenge -->
+            <section id="challenge" class="content-section active">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">The Challenge: Growth Without Depth</h2>
+                <p class="section-intro text-gray-600 mb-10">
+                    Vietnam's tertiary education has seen explosive enrollment growth, driven by a rising middle class. However, this rapid expansion has outpaced the development of quality and resources, creating a system under immense strain. This section explores the key dynamics of enrollment, student mobility, and the most popular fields of study.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="font-semibold text-lg mb-4">Tertiary Gross Enrollment Ratio (2000-2022)</h3>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="enrollmentRatioChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="font-semibold text-lg mb-4">Student-to-Lecturer Ratio</h3>
+                        <div class="flex flex-col items-center justify-center h-80 md:h-96">
+                            <div class="text-7xl font-bold text-[#008080]">28:1</div>
+                            <p class="mt-4 text-gray-600 text-center">This high ratio, up from 6:1, strains resources and limits personalized, modern teaching methods, highlighting the "growth without depth" paradox.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="font-semibold text-lg mb-4">Most Popular Fields of Study (2024 Admissions)</h3>
+                        <div class="chart-container h-96">
+                            <canvas id="fieldsOfStudyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md flex flex-col">
+                        <h3 class="font-semibold text-lg mb-4">Enrollment Share & Mobility</h3>
+                        <div class="chart-container h-64">
+                            <canvas id="enrollmentShareChart"></canvas>
+                        </div>
+                        <div class="mt-6 border-t pt-4 text-center">
+                            <p class="text-gray-600">A massive <span class="font-bold text-2xl text-gray-800">680%</span> increase in students studying abroad (1999-2016) signals a powerful market referendum on the quality of the domestic system.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: The Skills Gap -->
+            <section id="skills-gap" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">The Skills Gap: A Disconnect with the Economy</h2>
+                 <p class="section-intro text-gray-600 mb-10">
+                    A critical failure of the system is the persistent mismatch between university training and labor market needs. This results in underemployed graduates and skill shortages in key economic sectors. This section breaks down the specific skills employers demand versus what the current curriculum provides.
+                </p>
+                
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <div class="text-center mb-8">
+                        <p class="text-5xl font-bold text-red-500">50%</p>
+                        <p class="text-lg text-gray-600 mt-2">Of university graduates are unable to find work in their field of study, representing a massive misallocation of human capital.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4 text-center text-red-600">❌ University Curricula Focus</h3>
+                            <ul class="space-y-3">
+                                <li class="p-4 bg-red-50 rounded-lg"><strong>Rote Memorization:</strong> Emphasis on theory and passive learning.</li>
+                                <li class="p-4 bg-red-50 rounded-lg"><strong>Rigid, Centralized Content:</strong> Slow to adapt to market changes.</li>
+                                <li class="p-4 bg-red-50 rounded-lg"><strong>Lack of Practical Application:</strong> Limited project-based or hands-on learning.</li>
+                                <li class="p-4 bg-red-50 rounded-lg"><strong>Discourages Questioning:</strong> Fails to develop analytical skills.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4 text-center text-green-600">✅ In-Demand Industry Skills</h3>
+                            <ul class="space-y-3">
+                                <li class="p-4 bg-green-50 rounded-lg"><strong>Soft Skills:</strong> Critical Thinking, Problem-Solving, Creativity, Adaptability.</li>
+                                <li class="p-4 bg-green-50 rounded-lg"><strong>Technical Skills (Industry 4.0):</strong> AI, Data Science, Cybersecurity, Automation.</li>
+                                <li class="p-4 bg-green-50 rounded-lg"><strong>Project Management & Teamwork:</strong> Collaborative and practical execution skills.</li>
+                                <li class="p-4 bg-green-50 rounded-lg"><strong>Foreign Language Proficiency:</strong> Especially English for global integration.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: The Vision 2045 -->
+            <section id="vision" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">The Vision 2045: A "Leapfrog" Strategy</h2>
+                <p class="section-intro text-gray-600 mb-10">
+                    The Vietnamese government has launched an ambitious, top-down reform agenda to modernize its education system. The strategy aims to achieve global standards by 2045 through aggressive internationalization, massive R&D investment, and granting universities greater autonomy. Here are the core pillars and measurable goals of this vision.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="kpi-card p-6 rounded-xl shadow-md">
+                        <div class="text-2xl mb-2">🏆</div>
+                        <h3 class="font-bold text-lg">Global University Rankings</h3>
+                        <p class="text-gray-600 mt-1">Place Vietnamese universities in the global top 500 and Asian top 200 by 2030.</p>
+                    </div>
+                    <div class="kpi-card p-6 rounded-xl shadow-md">
+                        <div class="text-2xl mb-2">🔬</div>
+                        <h3 class="font-bold text-lg">R&D Investment</h3>
+                        <p class="text-gray-600 mt-1">Increase Research & Development expenditure to 2% of GDP.</p>
+                    </div>
+                    <div class="kpi-card p-6 rounded-xl shadow-md">
+                        <div class="text-2xl mb-2">💻</div>
+                        <h3 class="font-bold text-lg">High-Tech Workforce</h3>
+                        <p class="text-gray-600 mt-1">Increase STEM enrollment to 35% of all tertiary students by 2030.</p>
+                    </div>
+                    <div class="kpi-card p-6 rounded-xl shadow-md">
+                        <div class="text-2xl mb-2">🌍</div>
+                        <h3 class="font-bold text-lg">Internationalization</h3>
+                        <p class="text-gray-600 mt-1">Triple inbound international students to 1.5% and attract 2 new top-500 branch campuses.</p>
+                    </div>
+                    <div class="kpi-card p-6 rounded-xl shadow-md">
+                        <div class="text-2xl mb-2">📜</div>
+                        <h3 class="font-bold text-lg">Program Accreditation</h3>
+                        <p class="text-gray-600 mt-1">>20% of training programs to be accredited by prestigious overseas bodies.</p>
+                    </div>
+                    <div class="kpi-card p-6 rounded-xl shadow-md">
+                        <div class="text-2xl mb-2">🏛️</div>
+                        <h3 class="font-bold text-lg">Institutional Autonomy</h3>
+                        <p class="text-gray-600 mt-1">Grant universities broader autonomy in academic, financial, and organizational matters.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: The Future -->
+            <section id="future" class="content-section">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">The Future: Disruptive Trends</h2>
+                <p class="section-intro text-gray-600 mb-10">
+                    While systemic challenges persist, powerful trends are reshaping the education landscape from the outside in. The rise of private universities, the EdTech revolution, and deeper global partnerships are introducing new models, capital, and competition that will define the sector's future trajectory.
+                </p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="font-semibold text-lg mb-4">The EdTech Boom: Market Snapshot</h3>
+                        <div class="chart-container h-96">
+                            <canvas id="edtechMarketChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h3 class="font-semibold text-lg mb-4">Key Transformative Forces</h3>
+                        <div class="space-y-6 mt-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-12 w-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-2xl">🎓</div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold">Rise of Private & International Universities</h4>
+                                    <p class="text-gray-600">Injecting competition and market-responsive models. The government aims for private institutions to enroll 30% of students by 2030, up from ~23% in 2019.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-12 w-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-2xl">💡</div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold">The "Pedagogical Trojan Horse"</h4>
+                                    <p class="text-gray-600">Modern EdTech tools are built for active, collaborative learning, creating bottom-up pressure on educators to abandon rote memorization and adopt modern teaching methods.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-12 w-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-2xl">🤝</div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold">Deepening Global Integration</h4>
+                                    <p class="text-gray-600">A shift from "exporting talent" to "importing knowledge" through joint degree programs (408+ active) and strategic partnerships, embedding international standards domestically.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function showSection(sectionId, element) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        const chartOptions = {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    backgroundColor: '#4A4A4A',
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    cornerRadius: 4,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#EAE7E2'
+                    },
+                    ticks: {
+                        color: '#6B7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6B7280'
+                    }
+                }
+            }
+        };
+
+        // Chart 1: Enrollment Ratio
+        const enrollmentRatioCtx = document.getElementById('enrollmentRatioChart').getContext('2d');
+        new Chart(enrollmentRatioCtx, {
+            type: 'line',
+            data: {
+                labels: ['2000', '2013', '2019', '2022'],
+                datasets: [{
+                    label: 'Gross Enrollment Ratio (%)',
+                    data: [10, 25, 28.6, 42.22],
+                    borderColor: '#008080',
+                    backgroundColor: 'rgba(0, 128, 128, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Chart 2: Fields of Study
+        const fieldsOfStudyCtx = document.getElementById('fieldsOfStudyChart').getContext('2d');
+        new Chart(fieldsOfStudyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Business & Management', 'Computer Science & IT', 'Engineering Tech', 'Humanities', 'Health'],
+                datasets: [{
+                    label: '% of 2024 Admissions',
+                    data: [25, 12, 9, 9, 6],
+                    backgroundColor: ['#008080', '#4ca6a6', '#80cccc', '#b3e0e0', '#e6f5f5'],
+                    borderRadius: 4
+                }]
+            },
+            options: { ...chartOptions, indexAxis: 'y' }
+        });
+
+        // Chart 3: Enrollment Share
+        const enrollmentShareCtx = document.getElementById('enrollmentShareChart').getContext('2d');
+        new Chart(enrollmentShareCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Public (~77%)', 'Private (~23%)'],
+                datasets: [{
+                    label: 'Enrollment Share (2019)',
+                    data: [77, 23],
+                    backgroundColor: ['#008080', '#80cccc'],
+                    hoverOffset: 4
+                }]
+            },
+            options: { ...chartOptions, scales: { x: { display: false }, y: { display: false } } }
+        });
+
+        // Chart 4: EdTech Market
+        const edtechMarketCtx = document.getElementById('edtechMarketChart').getContext('2d');
+        new Chart(edtechMarketCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Market Size (USD)', 'VC Investment (USD)', 'Startups'],
+                datasets: [{
+                    label: 'Vietnam EdTech Market',
+                    data: [3000000000, 103000000, 300],
+                    backgroundColor: ['#008080', '#4ca6a6', '#80cccc'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                ...chartOptions,
+                scales: {
+                    y: {
+                        type: 'logarithmic',
+                        beginAtZero: true,
+                        grid: { color: '#EAE7E2' },
+                        ticks: {
+                            color: '#6B7280',
+                            callback: function(value, index, values) {
+                                if (value === 3000000000) return '$3B';
+                                if (value === 100000000) return '$100M';
+                                if (value === 1000000) return '$1M';
+                                if (value === 10000) return '$10k';
+                                if (value === 300) return '300';
+                                return null;
+                            }
+                        }
+                    },
+                    x: { ...chartOptions.scales.x }
+                }
+            }
+        });
+        
+        // Set initial active section on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialSection = window.location.hash.substring(1) || 'challenge';
+            const navLink = document.querySelector(`.nav-link[href="#${initialSection}"]`);
+            if (navLink) {
+                showSection(initialSection, navLink);
+            }
+        });
+    </script>
+</body>
+</html>
