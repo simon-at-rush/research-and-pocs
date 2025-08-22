@@ -342,7 +342,42 @@
                     borderRadius: 4
                 }]
             },
-            options: { ...chartOptions, indexAxis: 'y' }
+            options: {
+                ...chartOptions,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        ...chartOptions.plugins.tooltip
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#EAE7E2'
+                        },
+                        ticks: {
+                            color: '#6B7280'
+                        },
+                        title: {
+                            display: true,
+                            text: '% of Admissions',
+                            color: '#4A4A4A'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6B7280'
+                        }
+                    }
+                }
+            }
         });
 
         // Chart 3: Enrollment Share
