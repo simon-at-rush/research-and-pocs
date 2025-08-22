@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis of Tertiary Education Dropout Factors in Vietnam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Scholarly Neutrals -->
+    <!-- Application Structure Plan: A single-page, scrolling narrative structure is used to guide the user from understanding the scale of the problem to exploring its multifaceted causes and finally reviewing the proposed solutions. This thematic flow (Problem -> Causes -> Solutions) is more intuitive and engaging for a general audience than mirroring the report's academic structure. Key interactions include a tabbed interface to dissect the core dropout factors and clickable elements that dynamically update informational text and charts, allowing for self-paced exploration of the complex issue. -->
+    <!-- Visualization & Content Choices: 1. Attrition Metrics (Goal: Compare): A Chart.js bar chart compares key rates (e.g., average vs. goal) for immediate context. Interaction: Hover tooltips. Justification: Clear, direct comparison of quantitative data. 2. Core Dropout Factors (Goal: Organize/Explore): A tabbed layout separates the three domains. A dynamic Chart.js horizontal bar chart visualizes sub-factors within the selected domain, updated on click. Interaction: Clicking a factor updates the chart and a detailed text block. Justification: Breaks down complex, qualitative information into manageable, interactive chunks. 3. Systemic Disparities (Goal: Highlight Inequity): A grouped bar chart from Chart.js visualizes the stark difference in educational completion between the wealthiest and poorest quintiles. Interaction: Hover tooltips. Justification: A powerful, simple visual to convey a key social issue. 4. Solutions (Goal: Inform): An HTML/JS accordion organizes recommendations neatly. Interaction: Click to expand/collapse. Justification: Prevents information overload and allows users to focus on specific strategic areas. All charts use the Canvas API via Chart.js. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #3f3c3a;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #0d9488;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .factor-button {
+            transition: all 0.3s ease;
+        }
+        .factor-button.active {
+            background-color: #f0abfc;
+            color: #581c87;
+            border-left-color: #581c87;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-teal-700">Tertiary Dropout: Challenges & Solutions</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#problem" class="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Scale of the Problem</a>
+                        <a href="#factors" class="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Core Causes</a>
+                        <a href="#disparities" class="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Inequalities</a>
+                        <a href="#solutions" class="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Strategic Solutions</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="hero" class="text-center py-12">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight">The Leaking Human Capital Pipeline</h2>
+            <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600">Vietnam faces a serious challenge with its university dropout rate, threatening socioeconomic development goals and causing a significant waste of resources. The government aims to reduce this rate to below 10%.</p>
+        </section>
+
+        <section id="problem" class="py-12">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-teal-800">The Scale of the Problem in Numbers</h3>
+                <p class="mt-2 text-md text-gray-600">The data reveals an alarming picture of student attrition, from before enrollment through to the entire academic journey.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-purple-600">14.77%</p>
+                    <p class="mt-2 text-gray-600">Average Dropout Rate (World Bank projection 2022-23)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-purple-600">~60%</p>
+                    <p class="mt-2 text-gray-600">of dropouts leave during their first year</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-purple-600">18.13%</p>
+                    <p class="mt-2 text-gray-600">Admitted students who did not enroll (2024)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-purple-600">700-800</p>
+                    <p class="mt-2 text-gray-600">Students forced to withdraw annually at some top universities</p>
+                </div>
+            </div>
+            <div class="mt-12 bg-white p-6 rounded-lg shadow-md">
+                <h4 class="text-xl font-semibold text-center mb-4">Comparing Actual Dropout Rates & Government Targets</h4>
+                <div class="chart-container">
+                    <canvas id="attritionRateChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="factors" class="py-12">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-teal-800">The Core Causes of the Problem</h3>
+                <p class="mt-2 text-md text-gray-600">Dropping out is the result of a complex interplay of many factors. Explore the three main categories of causes.</p>
+            </div>
+            <div class="flex justify-center mb-8">
+                <div class="flex space-x-2 md:space-x-4 bg-gray-200 p-2 rounded-lg">
+                    <button id="btn-student" class="nav-button px-4 py-2 text-sm md:text-base rounded-md active">Student-Centric Factors</button>
+                    <button id="btn-socioeconomic" class="nav-button px-4 py-2 text-sm md:text-base rounded-md">Socioeconomic Pressures</button>
+                    <button id="btn-institutional" class="nav-button px-4 py-2 text-sm md:text-base rounded-md">Institutional Factors</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div id="factor-list-container" class="lg:col-span-4">
+                    </div>
+                    <div class="lg:col-span-8">
+                        <div id="factor-details" class="bg-stone-50 p-6 rounded-lg min-h-[300px]">
+                            <h4 id="factor-title" class="text-xl font-bold text-purple-800 mb-2"></h4>
+                            <p id="factor-description" class="text-gray-700"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="disparities" class="py-12">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-teal-800">Systemic Inequality: Who is Most Affected?</h3>
+                <p class="mt-2 text-md text-gray-600">Educational opportunities are not evenly distributed. Family background and geography have a profound impact on the ability to pursue higher education.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                 <h4 class="text-xl font-semibold text-center mb-4">Enrollment Rate by Age 19 Across Income Groups</h4>
+                <div class="chart-container">
+                    <canvas id="disparityChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="solutions" class="py-12">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-teal-800">Pathways to Persistence: Strategic Solutions</h3>
+                <p class="mt-2 text-md text-gray-600">Achieving the sub-10% target requires a coordinated, multifaceted strategy that addresses the root causes of the problem.</p>
+            </div>
+            <div class="space-y-4 max-w-4xl mx-auto">
+                <div class="accordion-item bg-white rounded-lg shadow-md">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-gray-800">
+                        <span>1. Reform the High School to University Transition</span>
+                        <span class="accordion-icon text-teal-600 text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-gray-200 text-gray-600">
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Strengthen Career Guidance:</strong> Develop professional, comprehensive career counseling programs in high schools to help students choose majors that fit their interests and abilities.</li>
+                                <li><strong>Diversify Admissions Methods:</strong> Encourage universities to adopt more holistic admissions models, not just relying on test scores, to ensure a better fit between students and programs.</li>
+                                <li><strong>Elevate Vocational Education (VET):</strong> Position VET as a valuable choice, not a backup plan, to reduce the pressure to enter university at all costs.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white rounded-lg shadow-md">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-gray-800">
+                        <span>2. Enhance Institutional Responsibility and Support</span>
+                        <span class="accordion-icon text-teal-600 text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-gray-200 text-gray-600">
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Mandate "First-Year Experience" Programs:</strong> Design first-year curricula focused on essential study skills, early major exposure, and proactive academic advising.</li>
+                                <li><strong>Invest in Student Support Services:</strong> Expand access to academic advising, mental health counseling, and financial aid support to help students overcome challenges.</li>
+                                <li><strong>Link Funding to Outcomes:</strong> Reform budget allocation to tie a portion of funding to success metrics like retention, timely graduation, and graduate employment rates.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white rounded-lg shadow-md">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg text-gray-800">
+                        <span>3. Address Systemic Socioeconomic Barriers</span>
+                        <span class="accordion-icon text-teal-600 text-2xl">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-gray-200 text-gray-600">
+                           <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Targeted Financial Aid:</strong> Expand scholarship and grant programs for students from disadvantaged backgrounds, especially from rural and ethnic minority areas.</li>
+                                <li><strong>Close the Urban-Rural Gap:</strong> Strategically invest to improve the quality of K-12 education in remote regions to enhance students' academic preparedness.</li>
+                                <li><strong>Strengthen Industry-University Linkages:</strong> Create policies to encourage collaboration on curriculum development and internships, ensuring student skills meet market demands.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white mt-12 border-t">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>This interactive application is based on the report "Pathways to Persistence: An Analysis of Tertiary Education Dropout Factors in Vietnam".</p>
+            <p class="text-sm mt-1">This is a data visualization tool, not an official research document.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const factorData = {
+                student: [
+                    { id: 'mismatch', title: 'Wrong Major, Wrong School', description: 'This is the most common reason, stemming from a lack of career guidance and pressure from family and society. Students lack passion and motivation, leading to boredom and dropping out. About 20-30% of first-year students realize they made the wrong choice.' },
+                    { id: 'preparedness', title: 'Academic Ability & Poor Performance', description: 'Many students are not adequately prepared with the foundational knowledge and self-study skills to keep up with the university curriculum. Broad admission standards contribute to this, leading to poor academic results and forced withdrawal.' },
+                    { id: 'psychological', title: 'Adaptation Difficulties & Mental Health', description: 'The transition to a more autonomous university environment causes stress, anxiety, and depression. Students struggle to adapt to the new environment, feel lonely and pressured, which negatively affects their studies.' },
+                ],
+                socioeconomic: [
+                    { id: 'financial', title: 'Financial Burden', description: 'High tuition and living costs are a major barrier, especially for students from poor, rural, or ethnic minority families. Many students accumulate tuition debt and cannot afford to continue.' },
+                    { id: 'opportunity', title: 'Opportunity Cost & Competing Priorities', description: 'The need to earn money forces students to work part-time, neglecting their studies. The appeal of immediate income from the gig economy (e.g., ride-hailing) or labor export makes a university degree seem less attractive.' },
+                    { id: 'disadvantage', title: 'Systemic Disadvantage', description: 'Disparities in educational quality between urban and rural areas, barriers for ethnic minorities, and low parental education create a double disadvantage, putting a group of students at a much higher risk of dropping out.' },
+                ],
+                institutional: [
+                    { id: 'curriculum', title: 'Curriculum & Teaching Methods', description: 'The curriculum, especially in the first year, is often seen as too theoretical, boring, and lacking practical application. Unengaging teaching methods reduce student interest and participation.' },
+                    { id: 'support', title: 'Support Systems & Learning Environment', description: 'Shortcomings in academic advising, faculty support, and poor quality of facilities reduce student satisfaction. An unfriendly, isolating campus environment also increases the intention to drop out.' },
+                    { id: 'value', title: 'Degree Value & Labor Market Alignment', description: 'The prevalence of unemployed or underemployed graduates erodes trust in the value of a university degree. When the cost is high but job prospects are uncertain, students consider other paths like vocational training.' },
+                ]
+            };
+
+            let currentFactorType = 'student';
+            const factorListContainer = document.getElementById('factor-list-container');
+            const factorTitle = document.getElementById('factor-title');
+            const factorDescription = document.getElementById('factor-description');
+
+            function updateFactorList(type) {
+                currentFactorType = type;
+                factorListContainer.innerHTML = '';
+                factorData[type].forEach((factor, index) => {
+                    const button = document.createElement('button');
+                    button.className = `factor-button w-full text-left p-4 rounded-lg border-l-4 mb-2 ${index === 0 ? 'active' : ''}`;
+                    button.textContent = factor.title;
+                    button.dataset.id = factor.id;
+                    factorListContainer.appendChild(button);
+                });
+                updateFactorDetails(factorData[type][0]);
+                addFactorButtonClickListeners();
+            }
+
+            function updateFactorDetails(factor) {
+                factorTitle.textContent = factor.title;
+                factorDescription.textContent = factor.description;
+            }
+
+            function addFactorButtonClickListeners() {
+                const factorButtons = factorListContainer.querySelectorAll('.factor-button');
+                factorButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        factorButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        const selectedFactor = factorData[currentFactorType].find(f => f.id === button.dataset.id);
+                        updateFactorDetails(selectedFactor);
+                    });
+                });
+            }
+
+            const navButtons = document.querySelectorAll('.nav-button');
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const type = button.id.split('-')[1];
+                    updateFactorList(type);
+                });
+            });
+            
+            updateFactorList('student');
+
+            const attritionCtx = document.getElementById('attritionRateChart').getContext('2d');
+            new Chart(attritionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Average Dropout Rate', 'First-Year Dropout Rate'],
+                    datasets: [
+                        {
+                            label: 'Actual Rate',
+                            data: [14.77, 17],
+                            backgroundColor: 'rgba(168, 85, 247, 0.6)',
+                            borderColor: 'rgba(168, 85, 247, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Government Target',
+                            data: [10, 15],
+                            backgroundColor: 'rgba(13, 148, 136, 0.6)',
+                            borderColor: 'rgba(13, 148, 136, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Percentage (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const disparityCtx = document.getElementById('disparityChart').getContext('2d');
+            new Chart(disparityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Enrollment Rate by Age 19'],
+                    datasets: [
+                        {
+                            label: 'Poorest 20% of Households',
+                            data: [20],
+                            backgroundColor: 'rgba(217, 70, 239, 0.6)',
+                            borderColor: 'rgba(217, 70, 239, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Wealthiest 20% of Households',
+                            data: [80],
+                            backgroundColor: 'rgba(20, 184, 166, 0.6)',
+                            borderColor: 'rgba(20, 184, 166, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                           beginAtZero: true,
+                           max: 100,
+                           title: {
+                                display: true,
+                                text: 'Percentage (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                         tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = item.querySelector('.accordion-icon');
+
+                header.addEventListener('click', () => {
+                    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+                    
+                    accordionItems.forEach(otherItem => {
+                        otherItem.querySelector('.accordion-content').style.maxHeight = '0px';
+                        otherItem.querySelector('.accordion-icon').textContent = '+';
+                    });
+
+                    if (!isOpen) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.textContent = '-';
+                    }
+                });
+            });
+            
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
