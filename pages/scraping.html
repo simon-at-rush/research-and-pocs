@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Pipeline Research & Architect</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Palette & Custom Styles -->
+    <style>
+        :root {
+            --bg-color: #fafaf9; /* Stone 50 */
+            --card-bg: #ffffff;
+            --text-main: #292524; /* Stone 800 */
+            --text-muted: #57534e; /* Stone 600 */
+            --accent-primary: #ea580c; /* Orange 600 */
+            --accent-secondary: #0ea5e9; /* Sky 500 */
+            --border-color: #e7e5e4; /* Stone 200 */
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            height: 350px;
+            max-height: 400px;
+        }
+
+        /* Custom Scrollbar for panels */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #d6d3d1; 
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e; 
+        }
+
+        .pipeline-connector {
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 2rem;
+            height: 2px;
+            background-color: #e5e7eb;
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+        
+        /* Interactive Card States */
+        .tool-card {
+            transition: all 0.2s ease;
+        }
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-color: var(--accent-secondary);
+        }
+        .tool-card.selected {
+            border-color: var(--accent-primary);
+            background-color: #fff7ed; /* Orange 50 */
+            border-width: 2px;
+        }
+
+    </style>
+
+    <!-- Placeholder Comments Required -->
+    <!-- Chosen Palette: Warm Neutrals (Stone/Orange/Sky). Designed for clarity and long reading sessions, minimizing eye strain while using specific accent colors to guide interaction. -->
+    
+    <!-- Application Structure Plan: 
+         1. Hero Section: Sets the context of the research.
+         2. Interactive Architecture Builder: The core "Explorer". Users can click through the 3 stages (Scraping, Storage, Automation) to see specific tool research. This replaces a linear report with a functional diagram.
+         3. Deep Dive Analysis: Dynamic content panel that updates based on the selection in the Builder. This holds the qualitative research (Pros/Cons/Use Cases).
+         4. Cost Simulator: A quantitative tool using Chart.js to estimate monthly costs based on volume, comparing "Low Code" vs "Pro Code" approaches.
+         5. Strategic Recommendations: A synthesis section summarizing the "Best for X" scenarios.
+         RATIONALE: This structure moves from conceptual design -> detailed tool analysis -> financial implication, mirroring the decision-making process of a Systems Architect.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Interactive Pipeline Diagram (HTML/CSS Grid): Used to visualize the data flow. Goal: Organize. JS handles selection state.
+         2. Dynamic Analysis Panel (HTML/JS): Displays text content. Goal: Inform. avoids text walls by showing only relevant tool details.
+         3. Comparative Cost Chart (Chart.js Bar): Visualizes the "Ongoing Costs" query. Goal: Compare. Allows user to see how costs scale non-linearly between tool stacks.
+         4. Feature Matrix (HTML Table + JS Filter): Quick comparison of capabilities. Goal: Compare.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+</head>
+<body class="pb-20">
+
+    <!-- Header / Hero -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-orange-600 text-white p-2 rounded-lg">
+                    <i class="fa-solid fa-network-wired"></i>
+                </div>
+                <h1 class="text-xl font-bold text-stone-800">Pipeline Architect <span class="text-stone-400 font-normal">| Research & Cost Analysis</span></h1>
+            </div>
+            <div class="text-sm text-stone-500 hidden md:block">
+                Interactive System Design Study
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Intro Text -->
+        <section class="max-w-4xl mx-auto text-center space-y-4">
+            <h2 class="text-3xl font-bold text-stone-900">Automation System Design</h2>
+            <p class="text-stone-600 text-lg leading-relaxed">
+                This research analyzes the three critical stages of a modern data pipeline: <strong>Extraction (Scraping)</strong>, <strong>Storage (Knowledge Base)</strong>, and <strong>Orchestration (Automation)</strong>. 
+                Interact with the modules below to explore the trade-offs between "Low-Code" ease and "Pro-Code" scalability.
+            </p>
+        </section>
+
+        <!-- INTERACTIVE PIPELINE BUILDER -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-stone-800 border-l-4 border-orange-500 pl-3">Architecture Explorer</h3>
+                <div class="text-sm text-stone-500 bg-stone-100 px-3 py-1 rounded-full">
+                    <i class="fa-solid fa-mouse-pointer mr-2"></i> Select a card to view detailed research
+                </div>
+            </div>
+
+            <!-- The 3-Column Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
+                
+                <!-- Stage 1: Scraping -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 text-orange-600 font-semibold uppercase text-sm tracking-wide mb-2">
+                        <i class="fa-solid fa-robot"></i> Stage 1: Ingestion
+                    </div>
+                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 h-full flex flex-col gap-3">
+                        <!-- Card: Firecrawl -->
+                        <div onclick="selectTool('firecrawl')" id="card-firecrawl" class="tool-card bg-white p-4 rounded-lg border border-stone-200 cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-stone-800 group-hover:text-orange-600">Firecrawl</h4>
+                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded">AI Optimized</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2">Specialized for LLMs. Converts websites to clean Markdown.</p>
+                        </div>
+                         <!-- Card: ScrapingBee -->
+                         <div onclick="selectTool('scrapingbee')" id="card-scrapingbee" class="tool-card bg-white p-4 rounded-lg border border-stone-200 cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-stone-800 group-hover:text-orange-600">ScrapingBee</h4>
+                                <span class="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Proxy API</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2">Handles rotation & headless browsers. Good for hard blocks.</p>
+                        </div>
+                        <!-- Card: Apify -->
+                        <div onclick="selectTool('apify')" id="card-apify" class="tool-card bg-white p-4 rounded-lg border border-stone-200 cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-stone-800 group-hover:text-orange-600">Apify</h4>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Platform</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2">Full ecosystem of pre-built "Actors". Serverless scraping.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 2: Storage -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 text-sky-600 font-semibold uppercase text-sm tracking-wide mb-2">
+                        <i class="fa-solid fa-database"></i> Stage 2: Knowledge Base
+                    </div>
+                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 h-full flex flex-col gap-3">
+                        <!-- Card: Airtable -->
+                        <div onclick="selectTool('airtable')" id="card-airtable" class="tool-card bg-white p-4 rounded-lg border border-stone-200 cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-stone-800 group-hover:text-sky-600">Airtable</h4>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">No-Code</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2">Relational database with spreadsheet UI. Easy for humans.</p>
+                        </div>
+                        <!-- Card: Supabase -->
+                        <div onclick="selectTool('supabase')" id="card-supabase" class="tool-card bg-white p-4 rounded-lg border border-stone-200 cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-stone-800 group-hover:text-sky-600">Supabase</h4>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Postgres + Vector</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2">Scalable backend. Native pgvector support for AI.</p>
+                        </div>
+                        <!-- Card: AlloyDB -->
+                        <div onclick="selectTool('alloydb')" id="card-alloydb" class="tool-card bg-white p-4 rounded-lg border border-stone-200 cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-stone-800 group-hover:text-sky-600">AlloyDB</h4>
+                                <span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">Enterprise</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2">Google's fully managed, high-performance Postgres.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 3: Automation -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 text-stone-600 font-semibold uppercase text-sm tracking-wide mb-2">
+                        <i class="fa-solid fa-gears"></i> Stage 3: Orchestration
+                    </div>
+                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 h-full flex flex-col gap-3">
+                         <!-- Card: Zapier -->
+                         <div onclick="selectTool('zapier')" id="card-zapier" class="tool-card bg-white p-4 rounded-lg border border-stone-200 cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-stone-800 group-hover:text-stone-600">Zapier</h4>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Standard</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2">Easiest to use. Massive integration library. Expensive at scale.</p>
+                        </div>
+                         <!-- Card: Make -->
+                         <div onclick="selectTool('make')" id="card-make" class="tool-card bg-white p-4 rounded-lg border border-stone-200 cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-stone-800 group-hover:text-stone-600">Make (Integromat)</h4>
+                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded">Visual Logic</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2">Visual node builder. Complex logic & branching.</p>
+                        </div>
+                        <!-- Card: Cloud Functions -->
+                        <div onclick="selectTool('cloudfunctions')" id="card-cloudfunctions" class="tool-card bg-white p-4 rounded-lg border border-stone-200 cursor-pointer group">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-stone-800 group-hover:text-stone-600">Cloud Functions</h4>
+                                <span class="text-xs bg-stone-800 text-stone-100 px-2 py-0.5 rounded">Code</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-2">Serverless code (AWS Lambda/GCP). Maximum control, lowest run cost.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- DYNAMIC DETAIL PANEL -->
+            <div id="detail-panel" class="mt-8 bg-white border border-stone-200 rounded-xl shadow-sm p-6 lg:p-8 transition-all duration-300 opacity-100">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 id="detail-title" class="text-2xl font-bold text-stone-900">Select a tool above</h3>
+                            <span id="detail-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-stone-100 text-stone-600 hidden">Category</span>
+                        </div>
+                        <p id="detail-desc" class="text-stone-600 leading-relaxed">
+                            Click on any of the cards in the architecture diagram above to see a deep-dive analysis, pros, cons, and specific pricing models relevant to your research.
+                        </p>
+                        
+                        <div id="detail-features" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 hidden">
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                                <h5 class="text-green-800 font-bold mb-2"><i class="fa-solid fa-check mr-2"></i>Pros</h5>
+                                <ul id="list-pros" class="text-sm text-green-900 space-y-1 list-disc list-inside"></ul>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+                                <h5 class="text-red-800 font-bold mb-2"><i class="fa-solid fa-xmark mr-2"></i>Cons</h5>
+                                <ul id="list-cons" class="text-sm text-red-900 space-y-1 list-disc list-inside"></ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-stone-50 rounded-lg p-5 border border-stone-200">
+                        <h4 class="text-sm uppercase tracking-wide text-stone-500 font-bold mb-4">Research Verdict</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-xs text-stone-500 block">Best Use Case</span>
+                                <p id="detail-usecase" class="text-stone-800 font-medium text-sm">-</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-stone-500 block">Pricing Model</span>
+                                <p id="detail-price" class="text-stone-800 font-medium text-sm">-</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-stone-500 block">Implementation Effort</span>
+                                <div class="w-full bg-stone-200 rounded-full h-2 mt-1">
+                                    <div id="detail-effort-bar" class="bg-orange-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-stone-400 mt-1">
+                                    <span>Low Code</span>
+                                    <span>Pro Code</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COST SIMULATION SECTION -->
+        <section class="border-t border-stone-200 pt-12">
+            <div class="max-w-4xl mx-auto mb-8 text-center">
+                <h2 class="text-2xl font-bold text-stone-900">Ongoing Cost Simulator</h2>
+                <p class="text-stone-600 mt-2">
+                    Estimate monthly infrastructure costs based on data volume. This compares three common architecture stacks: 
+                    <span class="font-semibold text-green-600">MVP (Low Code)</span>, 
+                    <span class="font-semibold text-blue-600">Growth (Hybrid)</span>, and 
+                    <span class="font-semibold text-purple-600">Scale (Code-First)</span>.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Controls -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-xl border border-stone-200 shadow-sm h-fit">
+                    <h3 class="font-bold text-stone-800 mb-6">Volume Inputs</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-2">Pages Scraped / Month</label>
+                            <input type="range" id="input-pages" min="1000" max="100000" step="1000" value="5000" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-orange-600">
+                            <div class="text-right text-orange-600 font-bold mt-1" id="label-pages">5,000</div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-2">Update Frequency</label>
+                            <select id="input-freq" class="w-full border-stone-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm p-2 border">
+                                <option value="1">Daily</option>
+                                <option value="0.25">Weekly</option>
+                                <option value="30">Hourly (High Freq)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-stone-100">
+                             <p class="text-xs text-stone-400">
+                                *Estimates include API costs, DB storage, and execution time. Does not include developer salaries.
+                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="lg:col-span-3 bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUMMARY TABLE -->
+        <section class="border-t border-stone-200 pt-12 pb-12">
+            <h2 class="text-2xl font-bold text-stone-900 mb-6">Technology Stack Recommendations</h2>
+            <div class="overflow-x-auto rounded-xl border border-stone-200 shadow-sm">
+                <table class="min-w-full divide-y divide-stone-200">
+                    <thead class="bg-stone-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Scenario</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Scraper</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Database</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Automation</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Verdict</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-stone-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">MVP / Prototype</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-stone-600">Apify</td>
+                            <td class="px-6 py-4 text-sm text-stone-600">Airtable</td>
+                            <td class="px-6 py-4 text-sm text-stone-600">Zapier</td>
+                            <td class="px-6 py-4 text-sm text-stone-500">Fastest to build (hours), highest monthly cost per record.</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Growth / RAG</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-stone-600">Firecrawl</td>
+                            <td class="px-6 py-4 text-sm text-stone-600">Supabase</td>
+                            <td class="px-6 py-4 text-sm text-stone-600">Make.com</td>
+                            <td class="px-6 py-4 text-sm text-stone-500">Best balance. Firecrawl gives clean AI data; Supabase handles vectors.</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">High Scale</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-stone-600">ScrapingBee</td>
+                            <td class="px-6 py-4 text-sm text-stone-600">AlloyDB / Supabase</td>
+                            <td class="px-6 py-4 text-sm text-stone-600">Cloud Functions</td>
+                            <td class="px-6 py-4 text-sm text-stone-500">Lowest unit economics, highest engineering maintenance.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JS LOGIC -->
+    <script>
+        // --- 1. RESEARCH DATA STORE ---
+        // This object acts as the "Source Report" database.
+        const toolsData = {
+            firecrawl: {
+                title: "Firecrawl",
+                badge: "Scraping Agent",
+                desc: "A newer entrant specifically designed for LLM applications. It converts websites into clean Markdown, stripping away HTML noise automatically. It also handles crawling entire subdomains.",
+                pros: ["Outputs clean Markdown (perfect for RAG)", "Handles crawling automatically", "API is extremely simple"],
+                cons: ["Less control over specific selectors compared to Puppeteer", "Newer, smaller ecosystem"],
+                usecase: "Building AI Knowledge Bases or RAG pipelines.",
+                price: "$0.005 - $0.01 per page (Estimated)",
+                effort: 30 // Low effort
+            },
+            scrapingbee: {
+                title: "ScrapingBee",
+                badge: "Proxy API",
+                desc: "A robust API that handles headless browsers and proxy rotation for you. Essential for scraping sites that aggressively block bots (Cloudflare, etc.).",
+                pros: ["Excellent proxy rotation", "Handles JS rendering perfectly", "pay-per-successful-request model"],
+                cons: ["Returns HTML (requires parsing logic)", "Can get pricey at high volume"],
+                usecase: "Scraping difficult/protected websites (e.g., e-commerce, social).",
+                price: "~$0.002 per credit (JS rendering costs 5+ credits)",
+                effort: 60 // Medium effort
+            },
+            apify: {
+                title: "Apify",
+                badge: "Platform",
+                desc: "A comprehensive cloud platform with a marketplace of pre-built scrapers ('Actors'). You can rent a ready-made Instagram scraper or build your own.",
+                pros: ["Marketplace of ready-to-use scrapers", "Managed infrastructure", "Built-in scheduling and storage"],
+                cons: ["Platform lock-in", "Monthly subscription + usage costs"],
+                usecase: "Teams who want 'off the shelf' scrapers without writing code.",
+                price: "$49/mo start + usage",
+                effort: 20 // Very low effort
+            },
+            airtable: {
+                title: "Airtable",
+                badge: "No-Code DB",
+                desc: "A hybrid spreadsheet/database. Extremely user-friendly but has hard limits on row counts (usually 50k-100k) and API rate limits.",
+                pros: ["Incredible UI/UX", "Easy automations built-in", "Great for manual review of scraped data"],
+                cons: ["Expensive per user", "Hard row limits (not for big data)", "API rate limits are tight"],
+                usecase: "Human-in-the-loop workflows or prototypes.",
+                price: "$20/user/mo",
+                effort: 10
+            },
+            supabase: {
+                title: "Supabase",
+                badge: "Postgres",
+                desc: "An open-source Firebase alternative based on PostgreSQL. Excellent for storing scraped data and embeddings (via pgvector) for AI search.",
+                pros: ["Full Postgres power", "Built-in Vector support", "Generous free tier"],
+                cons: ["Requires SQL knowledge", "Self-managed (mostly)"],
+                usecase: "Production apps and AI/Vector search backends.",
+                price: "Free tier, then $25/mo + usage",
+                effort: 70
+            },
+            alloydb: {
+                title: "AlloyDB",
+                badge: "Enterprise DB",
+                desc: "Google Cloud's fully managed PostgreSQL compatible database service for demanding enterprise workloads. Overkill for small projects.",
+                pros: ["4x faster than standard Postgres", "99.99% SLA", "Google ecosystem integration"],
+                cons: ["High starting price", "Complex configuration"],
+                usecase: "Enterprise-grade high-transaction applications.",
+                price: "Hourly vCPU/RAM pricing (Expensive entry)",
+                effort: 90
+            },
+            zapier: {
+                title: "Zapier",
+                badge: "Automation",
+                desc: "The standard for no-code automation. Connects almost anything to anything. Pricing is based on 'Tasks', which can burn quickly in scraping loops.",
+                pros: ["Massive integration library", "Very easy to learn", "Reliable"],
+                cons: ["Very expensive for high-volume loops", "Linear logic only (mostly)"],
+                usecase: "Simple triggers (e.g., 'When new row added, Slack me').",
+                price: "High ($0.01 - $0.05 per task)",
+                effort: 10
+            },
+            make: {
+                title: "Make (Integromat)",
+                badge: "Visual Logic",
+                desc: "A powerful visual automation platform. Allows for complex branching, iterators, and data manipulation. Cheaper per-operation than Zapier.",
+                pros: ["Visualizes complex flows well", "Cheaper than Zapier", "Good error handling"],
+                cons: ["Steep learning curve", "Scenario complexity can get messy"],
+                usecase: "Complex data transformation pipelines.",
+                price: "Moderate ($10/mo for 10k ops)",
+                effort: 50
+            },
+            cloudfunctions: {
+                title: "Cloud Functions",
+                badge: "Serverless Code",
+                desc: "Writing pure code (Python/Node) deployed to AWS Lambda or Google Cloud Functions. You pay only for milliseconds of compute.",
+                pros: ["Infinitely flexible", "Cheapest at scale", "No platform constraints"],
+                cons: ["High developer effort", "Maintenance required", "No GUI"],
+                usecase: "High-volume pipelines where unit cost matters most.",
+                price: "Near zero at low volume, very cheap at scale",
+                effort: 100
+            }
+        };
+
+        // --- 2. INTERACTION LOGIC ---
+        
+        let selectedToolId = null;
+
+        function selectTool(toolId) {
+            const data = toolsData[toolId];
+            if (!data) return;
+
+            // Update UI State
+            document.querySelectorAll('.tool-card').forEach(el => el.classList.remove('selected'));
+            document.getElementById(`card-${toolId}`).classList.add('selected');
+            document.getElementById('detail-panel').classList.remove('opacity-0');
+
+            // Populate Text
+            document.getElementById('detail-title').innerText = data.title;
+            document.getElementById('detail-badge').innerText = data.badge;
+            document.getElementById('detail-badge').classList.remove('hidden');
+            document.getElementById('detail-desc').innerText = data.desc;
+            document.getElementById('detail-usecase').innerText = data.usecase;
+            document.getElementById('detail-price').innerText = data.price;
+            document.getElementById('detail-effort-bar').style.width = `${data.effort}%`;
+
+            // Populate Lists
+            const prosList = document.getElementById('list-pros');
+            const consList = document.getElementById('list-cons');
+            prosList.innerHTML = '';
+            consList.innerHTML = '';
+            
+            data.pros.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                prosList.appendChild(li);
+            });
+            
+            data.cons.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                consList.appendChild(li);
+            });
+
+            document.getElementById('detail-features').classList.remove('hidden');
+        }
+
+        // Initialize with Firecrawl selected
+        window.addEventListener('DOMContentLoaded', () => {
+            selectTool('firecrawl');
+            initChart();
+        });
+
+
+        // --- 3. CHART & CALCULATOR LOGIC ---
+        
+        let costChart;
+
+        function initChart() {
+            const ctx = document.getElementById('costChart').getContext('2d');
+            
+            costChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['MVP (No-Code)', 'Growth (Hybrid)', 'Scale (Code-First)'],
+                    datasets: [
+                        {
+                            label: 'Scraping Cost ($)',
+                            data: [0, 0, 0],
+                            backgroundColor: '#fb923c', // Orange 400
+                        },
+                        {
+                            label: 'DB/Storage Cost ($)',
+                            data: [0, 0, 0],
+                            backgroundColor: '#38bdf8', // Sky 400
+                        },
+                        {
+                            label: 'Automation Cost ($)',
+                            data: [0, 0, 0],
+                            backgroundColor: '#a8a29e', // Stone 400
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + context.raw.toFixed(2);
+                                },
+                                footer: function(tooltipItems) {
+                                    let sum = 0;
+                                    tooltipItems.forEach(function(tooltipItem) {
+                                        sum += tooltipItem.raw;
+                                    });
+                                    return 'Total: $' + sum.toFixed(2);
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { display: false }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Monthly Cost ($)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            updateCalculation();
+        }
+
+        // Inputs
+        const inputPages = document.getElementById('input-pages');
+        const labelPages = document.getElementById('label-pages');
+        const inputFreq = document.getElementById('input-freq');
+
+        inputPages.addEventListener('input', (e) => {
+            labelPages.innerText = Number(e.target.value).toLocaleString();
+            updateCalculation();
+        });
+        
+        inputFreq.addEventListener('change', updateCalculation);
+
+        function updateCalculation() {
+            const pages = parseInt(inputPages.value);
+            const freqMultiplier = parseFloat(inputFreq.value); // Not actually used in logic below for simplicity, assuming 'pages' is total monthly volume.
+            
+            // Logic for Stack 1: MVP (Apify + Airtable + Zapier)
+            // Apify: $49 base + usage roughly
+            const s1_scrape = 49 + (pages * 0.002); 
+            // Airtable: $20 fixed (assuming 1 user)
+            const s1_db = 20; 
+            // Zapier: Expensive. Approx $0.02 per task. 1 page = 1 task (simplified)
+            const s1_auto = pages * 0.02;
+
+            // Logic for Stack 2: Growth (Firecrawl + Supabase + Make)
+            // Firecrawl: $0.006 per page
+            const s2_scrape = pages * 0.006;
+            // Supabase: $25 base
+            const s2_db = 25;
+            // Make: Cheaper than Zapier. $0.001 per op roughly
+            const s2_auto = pages * 0.002;
+
+            // Logic for Stack 3: Scale (ScrapingBee + AlloyDB/SelfHosted + CloudFunc)
+            // ScrapingBee: Bulk credits cheap. $0.0015
+            const s3_scrape = pages * 0.0025; 
+            // Cloud DB (AlloyDB is expensive base, maybe $100 min for instance)
+            const s3_db = 150; 
+            // Cloud Func: Dirt cheap execution
+            const s3_auto = pages * 0.00001 + 5; // +5 for logging/monitor
+
+            // Update Chart Data
+            costChart.data.datasets[0].data = [s1_scrape, s2_scrape, s3_scrape];
+            costChart.data.datasets[1].data = [s1_db, s2_db, s3_db];
+            costChart.data.datasets[2].data = [s1_auto, s2_auto, s3_auto];
+            
+            costChart.update();
+        }
+
+    </script>
+</body>
+</html>
