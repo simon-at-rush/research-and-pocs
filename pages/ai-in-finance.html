@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ravensdown AI Governance: Finance & Administration Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Styles for strict constraints and UI polish */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #0f172a; /* slate-900 */
+        }
+        
+        /* Required Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Hide scrollbar for clean horizontal scrolling areas if needed, though we aim to prevent it */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Smooth transitions */
+        .tool-card {
+            transition: all 0.3s ease;
+        }
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Tab active state */
+        .tab-active {
+            border-bottom: 2px solid #2563eb; /* blue-600 */
+            color: #2563eb;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <!-- Chosen Palette: Corporate Slate & Blue. Background: slate-50. Primary text: slate-900. Accents: blue-600 (safe/info), red-600 (danger/restrictions), amber-500 (warnings). -->
+    
+    <!-- Application Structure Plan: 
+         1. Header & Hero: Establishes context for the Finance team immediately.
+         2. Executive Summary / Policy Tracker: A tabbed interface to quickly digest rules, request procedures, and incident reporting. Finance teams need quick access to compliance steps without reading pages of text.
+         3. Finance Tool Explorer (Interactive): The core feature. A filterable directory of approved tools categorized by Data Sensitivity (the most critical metric for finance). This allows users to find the right tool for reporting vs. generic research.
+         4. Impact Dashboard: Visualizes the tool distribution and hypothetical productivity gains to emphasize the "why" behind the policy.
+         Rationale: This dashboard structure transforms a dry policy document into a task-oriented portal. Finance professionals prioritize data security and efficiency; this structure surfaces data sensitivity rules immediately and provides interactive ways to find compliant tools.
+    -->
+
+    <!-- Visualization & Content Choices: 
+         - Data Sensitivity Filter (Tool Explorer): Goal: Compare/Organize. Method: JS-filtered HTML Grid. Justification: Finance users must know instantly what handles sensitive data.
+         - Policy Workflows (Tabs): Goal: Inform. Method: Interactive Text Tabs. Justification: Condenses procedures (requests, reporting) into easily accessible bites.
+         - Tool Authorization Status (Doughnut Chart): Goal: Inform/Organize. Method: Chart.js Doughnut. Justification: Visually reinforces that most tools are NOT for sensitive data, highlighting the need for caution.
+         - Finance Use Case Impact (Bar Chart): Goal: Inform. Method: Chart.js Bar. Justification: Shows the "boost productivity" goal from the policy translated into finance-specific scenarios.
+         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. Canvas (Chart.js) and standard HTML/CSS used for all visuals.
+    -->
+
+    <!-- Navigation -->
+    <nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <!-- HTML geometric icon representing data/blocks -->
+                    <div class="grid grid-cols-2 gap-0.5 w-6 h-6">
+                        <div class="bg-blue-500 rounded-sm"></div>
+                        <div class="bg-blue-400 rounded-sm"></div>
+                        <div class="bg-blue-300 rounded-sm"></div>
+                        <div class="bg-blue-600 rounded-sm"></div>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight">Ravensdown AI <span class="text-blue-400 font-light">| Finance Hub</span></span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#policy" class="hover:bg-slate-700 px-3 py-2 rounded-md text-sm font-medium transition">Policy & Governance</a>
+                        <a href="#tools" class="hover:bg-slate-700 px-3 py-2 rounded-md text-sm font-medium transition">Approved Tools</a>
+                        <a href="#impact" class="hover:bg-slate-700 px-3 py-2 rounded-md text-sm font-medium transition">Impact</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Hero Section -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-8 py-10 md:p-12 text-center md:text-left md:flex items-center justify-between gap-8">
+                <div class="md:w-2/3 space-y-4">
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900">Responsible AI for Financial Operations</h1>
+                    <p class="text-lg text-slate-600">
+                        We are committed to the safe and responsible use of AI tools to enhance capabilities, automate routine tasks, and enable data-driven financial insights. 
+                        As we streamline month-end reporting and financial analysis, <strong>data privacy and system security</strong> remain our top priority.
+                    </p>
+                    <div class="pt-4 flex flex-wrap gap-4 justify-center md:justify-start">
+                        <a href="#tools" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition">Find an AI Tool</a>
+                        <a href="#policy" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-2 px-6 rounded-lg border border-slate-300 transition">View Compliance Rules</a>
+                    </div>
+                </div>
+                <div class="hidden md:flex w-1/3 justify-center">
+                    <!-- Abstract geometric representation of a secure document -->
+                    <div class="relative w-40 h-48 bg-slate-100 border-2 border-slate-300 rounded-lg shadow-inner flex flex-col items-center justify-center p-4">
+                        <div class="w-full h-3 bg-slate-300 rounded mb-3"></div>
+                        <div class="w-3/4 h-3 bg-slate-300 rounded mb-3 self-start"></div>
+                        <div class="w-full h-3 bg-slate-300 rounded mb-3"></div>
+                        <div class="mt-auto w-12 h-12 rounded-full border-4 border-blue-500 flex items-center justify-center bg-white shadow-md absolute -bottom-4 -right-4">
+                            <span class="text-blue-500 font-bold text-xl">&#10003;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Policy & Workflows -->
+        <section id="policy" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900">Governance & Procedures</h2>
+                <p class="text-slate-600 mt-2">Essential rules for the Finance team regarding data handling, tool requests, and incident reporting. Select a tab to review procedures.</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <!-- Tabs -->
+                <div class="flex border-b border-slate-200 bg-slate-50">
+                    <button class="flex-1 py-4 px-6 text-sm font-medium text-slate-600 hover:text-blue-600 focus:outline-none tab-btn tab-active" data-target="tab-rules">General Usage Rules</button>
+                    <button class="flex-1 py-4 px-6 text-sm font-medium text-slate-600 hover:text-blue-600 focus:outline-none tab-btn" data-target="tab-request">Requesting AI Tools</button>
+                    <button class="flex-1 py-4 px-6 text-sm font-medium text-slate-600 hover:text-blue-600 focus:outline-none tab-btn" data-target="tab-incident">Reporting Incidents</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="p-6 md:p-8">
+                    <!-- Rules Tab -->
+                    <div id="tab-rules" class="tab-content">
+                        <h3 class="text-xl font-bold mb-4 text-slate-800">Core Rules for Finance Data</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-3 text-xl">&#10003;</span>
+                                <div>
+                                    <strong class="block text-slate-900">Comply with Data Protection</strong>
+                                    <span class="text-slate-600 text-sm">You must not use AI tools in ways that violate Ravensdown policies or data protection obligations. Financial records, PII, and payroll data require strict handling.</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-red-500 mr-3 text-xl">&#10007;</span>
+                                <div>
+                                    <strong class="block text-slate-900">No Unauthorized External Sharing</strong>
+                                    <span class="text-slate-600 text-sm">Do not upload sensitive financial data, internal reports, or source code with secrets into unapproved or public-facing AI models (e.g., standard free ChatGPT, Claude Web).</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-3 text-xl">&#8505;</span>
+                                <div>
+                                    <strong class="block text-slate-900">Approved Devices Only</strong>
+                                    <span class="text-slate-600 text-sm">Use AI tools only on Ravensdown-issued devices (laptops, PCs, mobile phones). Consult IT for guidance on personal devices.</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Request Tab -->
+                    <div id="tab-request" class="tab-content hidden">
+                        <h3 class="text-xl font-bold mb-4 text-slate-800">Approval Workflow for New Tools</h3>
+                        <p class="text-slate-600 mb-6 text-sm">If you need an AI tool for financial modeling or processing that is not on the pre-approved list, you must request approval if it processes sensitive data.</p>
+                        
+                        <div class="flex flex-col md:flex-row gap-4 items-center">
+                            <div class="flex-1 bg-slate-50 p-4 rounded-lg border border-slate-200 w-full text-center relative">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mx-auto mb-2">1</div>
+                                <span class="font-medium text-sm text-slate-800">Open AI Tool Request Form</span>
+                            </div>
+                            <div class="text-slate-400 text-2xl hidden md:block">&#10142;</div>
+                            <div class="flex-1 bg-slate-50 p-4 rounded-lg border border-slate-200 w-full text-center relative">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mx-auto mb-2">2</div>
+                                <span class="font-medium text-sm text-slate-800">Select "Other" & Add Reasoning</span>
+                            </div>
+                            <div class="text-slate-400 text-2xl hidden md:block">&#10142;</div>
+                            <div class="flex-1 bg-slate-50 p-4 rounded-lg border border-slate-200 w-full text-center relative">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mx-auto mb-2">3</div>
+                                <span class="font-medium text-sm text-slate-800">Provide Details</span>
+                                <p class="text-xs text-slate-500 mt-1">Name, link, reason, and specific data type.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Incident Tab -->
+                    <div id="tab-incident" class="tab-content hidden">
+                        <h3 class="text-xl font-bold mb-4 text-red-600">Reporting Data Incidents</h3>
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                            <p class="text-red-800 text-sm font-medium">If you suspect that sensitive financial or confidential information has been disclosed or compromised via an AI tool, act immediately.</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+                                <div class="text-3xl mb-2">&#128100;</div>
+                                <h4 class="font-bold text-slate-900">Step 1: Inform Manager</h4>
+                                <p class="text-slate-600 text-sm mt-1">Immediately notify your direct manager or the Finance Director about the potential breach.</p>
+                            </div>
+                            <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+                                <div class="text-3xl mb-2">&#128187;</div>
+                                <h4 class="font-bold text-slate-900">Step 2: Contact IT</h4>
+                                <p class="text-slate-600 text-sm mt-1">Submit a high-priority report to the IT department via <strong>RavHelp</strong>. The sooner you report, the faster impact is minimized.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Interactive Tool Explorer -->
+        <section id="tools" class="scroll-mt-20">
+            <div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Finance Tool Explorer</h2>
+                    <p class="text-slate-600 mt-2">Filter approved AI tools based on the sensitivity of the financial data you are working with.</p>
+                </div>
+                
+                <!-- Filter Controls -->
+                <div class="flex bg-slate-200 p-1 rounded-lg self-start md:self-auto">
+                    <button class="filter-btn px-4 py-1.5 rounded-md text-sm font-medium transition-colors bg-white shadow text-slate-800" data-filter="all">All Tools</button>
+                    <button class="filter-btn px-4 py-1.5 rounded-md text-sm font-medium transition-colors text-slate-600 hover:text-slate-900" data-filter="sensitive">Safe for Sensitive Data</button>
+                    <button class="filter-btn px-4 py-1.5 rounded-md text-sm font-medium transition-colors text-slate-600 hover:text-slate-900" data-filter="public">Public Data Only</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Grid Container -->
+            <div id="tools-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Section 3: Visual Insights -->
+        <section id="impact" class="scroll-mt-20">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900">AI Tooling Landscape</h2>
+                <p class="text-slate-600 mt-2">Visual breakdown of tool security categorizations and potential productivity impact for the finance department.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Chart 1: Data Safety -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 text-center">Approved Tools by Data Safety Level</h3>
+                    <p class="text-xs text-slate-500 text-center mb-4">Crucial: Only 2 out of 6 tools are authorized for sensitive internal data.</p>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="chart-container">
+                            <canvas id="safetyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Potential Impact -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 text-center">Hypothetical Finance Use Cases</h3>
+                    <p class="text-xs text-slate-500 text-center mb-4">Estimated automation potential for standard finance tasks using Copilot/ChatGPT.</p>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="chart-container">
+                            <canvas id="impactChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-16 pt-8 border-t border-slate-200 text-center text-slate-500 text-sm pb-8">
+            <p>Policy Control: AI Governance Committee ('AI GC') | Last Reviewed: 8 August 2025</p>
+            <p class="mt-1">For full details, visit the Ravensdown SharePoint AI Governance page.</p>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Data Storage ---
+        // Represents the data from the 'AI Tools.pdf' structured for the Finance persona
+        const toolsData = [
+            {
+                id: 'copilot',
+                name: "Microsoft Copilot",
+                edition: "(Enterprise)",
+                category: "Office & Reporting",
+                sensitiveApproved: true,
+                bestFor: "Enterprise reporting, document drafting, meeting insights, and slide generation using live M365 data.",
+                rules: "Standard safe use applies. Do not bypass established M365 permissions.",
+                financeContext: "Ideal for summarizing monthly financial narratives in Word, analyzing trends in Excel, and generating Board slides.",
+                iconHtml: "<div class='w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg'>Co</div>"
+            },
+            {
+                id: 'chatgpt',
+                name: "ChatGPT",
+                edition: "(Enterprise)",
+                category: "Analysis & Drafting",
+                sensitiveApproved: true,
+                bestFor: "Secure, versatile assistant across writing, coding, and internal knowledge tasks.",
+                rules: "Must use Enterprise license. Follow standard safe use guidelines.",
+                financeContext: "Great for drafting financial policy documents, explaining complex tax regulations, or creating email templates for vendor follow-ups.",
+                iconHtml: "<div class='w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center font-bold text-lg'>GPT</div>"
+            },
+            {
+                id: 'claude',
+                name: "Claude",
+                edition: "(Web)",
+                category: "Document Parsing",
+                sensitiveApproved: false,
+                bestFor: "Advanced reasoning, parsing complex documents, dense text summarization.",
+                rules: "Upload public or scrubbed versions of documents only. NO sensitive data.",
+                financeContext: "Use ONLY for analyzing publicly available competitor financial statements or public market research. Do not upload internal ledgers.",
+                iconHtml: "<div class='w-10 h-10 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-lg'>Cl</div>"
+            },
+            {
+                id: 'kiro',
+                name: "Kiro",
+                edition: "(Amazon)",
+                category: "Specs & Legal",
+                sensitiveApproved: false,
+                bestFor: "Legal teams, HR policy work, complex documentation review.",
+                rules: "Source code without secrets is approved. Do not expose sensitive business logic.",
+                financeContext: "Can be used to review generic, non-confidential vendor contract templates or standard public compliance frameworks.",
+                iconHtml: "<div class='w-10 h-10 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center font-bold text-lg'>Ki</div>"
+            },
+            {
+                id: 'cursor',
+                name: "Cursor",
+                edition: "",
+                category: "Coding",
+                sensitiveApproved: false,
+                bestFor: "Fast, AI-first code editor for debugging and refactoring.",
+                rules: "Source code without secrets is approved.",
+                financeContext: "For Finance-IT hybrids: Safe for writing Python scripts for basic data formatting, provided no actual financial data is passed to the AI.",
+                iconHtml: "<div class='w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg'>Cu</div>"
+            },
+            {
+                id: 'warp',
+                name: "Warp Dev",
+                edition: "",
+                category: "Terminal",
+                sensitiveApproved: false,
+                bestFor: "AI-enhanced terminal, DevOps.",
+                rules: "Source code without secrets is approved.",
+                financeContext: "Primarily for systems administrators managing financial systems infrastructure. No direct finance user application.",
+                iconHtml: "<div class='w-10 h-10 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-lg'>Wp</div>"
+            }
+        ];
+
+        // --- Core Interaction & Rendering ---
+
+        // Function to render tool cards based on a filter
+        function renderTools(filterType = 'all') {
+            const grid = document.getElementById('tools-grid');
+            grid.innerHTML = ''; // Clear current
+
+            const filteredData = toolsData.filter(tool => {
+                if (filterType === 'all') return true;
+                if (filterType === 'sensitive') return tool.sensitiveApproved === true;
+                if (filterType === 'public') return tool.sensitiveApproved === false;
+            });
+
+            if (filteredData.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500">No tools found for this category.</div>`;
+                return;
+            }
+
+            filteredData.forEach(tool => {
+                const badgeClass = tool.sensitiveApproved 
+                    ? 'bg-green-100 text-green-800 border-green-200' 
+                    : 'bg-red-100 text-red-800 border-red-200';
+                const badgeText = tool.sensitiveApproved ? 'Safe for Sensitive Data' : 'Public/Scrubbed Data ONLY';
+                
+                const cardHTML = `
+                    <div class="tool-card bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col h-full">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                ${tool.iconHtml}
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-lg leading-tight">${tool.name}</h3>
+                                    <span class="text-xs text-slate-500">${tool.edition} • ${tool.category}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <span class="inline-block px-2.5 py-1 text-xs font-semibold rounded border ${badgeClass}">
+                                ${tool.sensitiveApproved ? '&#10003;' : '&#9888;'} ${badgeText}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-3 flex-grow text-sm">
+                            <div>
+                                <strong class="text-slate-700 block text-xs uppercase tracking-wider mb-1">Best For</strong>
+                                <p class="text-slate-600">${tool.bestFor}</p>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                <strong class="text-blue-800 block text-xs uppercase tracking-wider mb-1">Finance Use Case</strong>
+                                <p class="text-blue-900">${tool.financeContext}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-slate-100">
+                            <strong class="text-slate-700 block text-xs uppercase tracking-wider mb-1">Rules for Safe Use</strong>
+                            <p class="text-slate-600 text-sm italic">${tool.rules}</p>
+                        </div>
+                    </div>
+                `;
+                grid.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        // --- Event Listeners Setup ---
+        function setupInteractions() {
+            // Tab Switching Logic
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active states
+                    tabBtns.forEach(b => {
+                        b.classList.remove('tab-active', 'text-blue-600', 'bg-white', 'border-t', 'border-l', 'border-r', 'rounded-t-lg');
+                        b.classList.add('text-slate-600');
+                    });
+                    tabContents.forEach(c => c.classList.add('hidden'));
+
+                    // Add active state to clicked
+                    btn.classList.add('tab-active', 'bg-white');
+                    btn.classList.remove('text-slate-600');
+                    const targetId = btn.getAttribute('data-target');
+                    document.getElementById(targetId).classList.remove('hidden');
+                });
+            });
+
+            // Filter Button Logic
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Reset styling
+                    filterBtns.forEach(b => {
+                        b.classList.remove('bg-white', 'shadow', 'text-slate-800');
+                        b.classList.add('text-slate-600');
+                    });
+                    
+                    // Set active styling
+                    const targetBtn = e.target;
+                    targetBtn.classList.add('bg-white', 'shadow', 'text-slate-800');
+                    targetBtn.classList.remove('text-slate-600');
+
+                    // Render
+                    const filterType = targetBtn.getAttribute('data-filter');
+                    renderTools(filterType);
+                });
+            });
+        }
+
+        // --- Chart Initialization ---
+        function initCharts() {
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#64748b'; // slate-500
+
+            // 1. Doughnut Chart: Tool Safety Distribution
+            const safetyCtx = document.getElementById('safetyChart').getContext('2d');
+            const approvedCount = toolsData.filter(t => t.sensitiveApproved).length;
+            const publicCount = toolsData.length - approvedCount;
+
+            new Chart(safetyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Approved for Sensitive Data', 'Restricted to Public/Scrubbed'],
+                    datasets: [{
+                        data: [approvedCount, publicCount],
+                        backgroundColor: [
+                            '#22c55e', // green-500
+                            '#ef4444'  // red-500
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Critical for adhering to container heights
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 20, usePointStyle: true, boxWidth: 8 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw} Tools`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            // 2. Bar Chart: Hypothetical Impact (Automation Potential)
+            // Note: Data is illustrative to fulfill the visualization requirement in a relevant context.
+            const impactCtx = document.getElementById('impactChart').getContext('2d');
+            new Chart(impactCtx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        'Meeting Summaries', 
+                        'Data Recon Scripts', 
+                        'Policy Drafting', 
+                        'Report Formatting'
+                    ],
+                    datasets: [{
+                        label: 'Estimated Hours Saved (Monthly)',
+                        data: [15, 25, 10, 20],
+                        backgroundColor: '#3b82f6', // blue-500
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Critical for adhering to container heights
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9' }, // slate-100
+                            title: { display: true, text: 'Hours Saved' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                // Wrapping logic for long labels
+                                callback: function(value, index, values) {
+                                    const label = this.getLabelForValue(value);
+                                    if(label.length > 12) {
+                                        return label.split(' '); // simple wrap on space for this dataset
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.raw} Hours Saved/Month`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTools('all'); // Initial render
+            setupInteractions();
+            
+            // Short delay to ensure DOM is fully ready for canvas sizing
+            setTimeout(() => {
+                initCharts();
+            }, 100);
+        });
+
+    </script>
+</body>
+</html>
