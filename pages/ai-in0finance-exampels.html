@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ravensdown Finance AI Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom UI Polish */
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: #f4f7f6; /* Very light cool grey */
+            color: #1e293b; /* Slate 800 */
+        }
+        
+        /* Strict Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        /* Smooth UI transitions */
+        .use-case-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .use-case-card:hover, .use-case-card.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6; /* Blue 500 */
+        }
+        .use-case-card.active {
+            background-color: #eff6ff; /* Blue 50 */
+        }
+
+        /* Hide scrollbar for cleanly scrollable areas */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-200 selection:text-blue-900">
+
+    <!-- Chosen Palette: Professional Corporate Finance. Background: #f4f7f6 (soft cool grey). Primary: #1e293b (slate-800). Accents: #3b82f6 (blue-500) for interactive elements, #10b981 (emerald-500) for approved/success, #f59e0b (amber-500) for warnings. -->
+    
+    <!-- Application Structure Plan: 
+         1. Hero Section: Sets the strategic vision for AI in corporate finance (from retrospective reporting to predictive analytics).
+         2. Approved Tool Matrix: A clear, interactive grid organizing tools by data sensitivity (Enterprise vs. Consumer) - a critical compliance mandate from the text.
+         3. Real-Life Industry Workflows (The Core): An interactive split-pane layout showcasing specific finance use cases (IRD fraud detection, Copilot variance analysis, CarbonCrop environmental finance). Users click a card to see the deep dive. This satisfies the user's specific request for "real-life examples".
+         4. ROLES Prompt Builder: An interactive utility allowing users to build a finance-specific prompt based on the document's prompt engineering framework.
+         Rationale: This structure moves the user logically from "What is approved?" to "What can it actually do in the real world?" and finally "How do I use it effectively?".
+    -->
+
+    <!-- Visualization & Content Choices: 
+         - Data Sensitivity Matrix (Grid): Goal: Organize/Inform. Method: HTML/Tailwind Grid with Unicode icons. Justification: Clearly delineates what tools handle what data. NO SVG.
+         - Impact Bar Chart: Goal: Compare. Method: Chart.js Bar Chart. Justification: Visualizes the 520 hours saved and 20 mins/account saved as mentioned in the text.
+         - Interactive Workflow Explorer: Goal: Inform/Engage. Method: Vanilla JS driven content switcher. Justification: Allows deep diving into complex real-world examples (IRD, Copilot) without overwhelming the page with text.
+         - ROLES Prompt Builder: Goal: Interactive Learning. Method: HTML forms + JS string concatenation. Justification: Teaches the prompt framework interactively.
+         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. Strictly HTML/CSS and Canvas (Chart.js).
+    -->
+
+    <!-- Navigation -->
+    <nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-lg border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <!-- HTML geometric logo -->
+                    <div class="grid grid-cols-2 gap-1 w-6 h-6">
+                        <div class="bg-blue-500 rounded-tl-sm"></div>
+                        <div class="bg-blue-400 rounded-tr-sm"></div>
+                        <div class="bg-emerald-400 rounded-bl-sm"></div>
+                        <div class="bg-blue-600 rounded-br-sm"></div>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight">Ravensdown <span class="text-blue-400 font-light">Finance AI</span></span>
+                </div>
+                <div class="hidden md:flex space-x-6 text-sm font-medium">
+                    <a href="#tools" class="hover:text-blue-400 transition">Approved Tooling</a>
+                    <a href="#workflows" class="hover:text-blue-400 transition">Real-Life Workflows</a>
+                    <a href="#prompting" class="hover:text-blue-400 transition">Prompt Builder</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+        <!-- Hero Section -->
+        <section class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-8 py-12 md:p-16 flex flex-col md:flex-row items-center gap-10">
+                <div class="md:w-3/5 space-y-6">
+                    <div class="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full uppercase tracking-wide">Strategic Integration</div>
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">
+                        The Algorithmic Paradigm in <span class="text-blue-600">Corporate Finance</span>
+                    </h1>
+                    <p class="text-lg text-slate-600 leading-relaxed">
+                        Transitioning from retrospective reporting and manual data consolidation toward predictive analytics and autonomous operations. AI is no longer experimental; it is core enterprise infrastructure designed to automate the <strong class="text-slate-800">520 hours annually</strong> spent on routine tasks.
+                    </p>
+                    <div class="pt-4 flex gap-4">
+                        <a href="#workflows" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-blue-200 transition">See Real Industry Examples</a>
+                    </div>
+                </div>
+                <div class="md:w-2/5 w-full">
+                    <!-- Impact Chart -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <h3 class="text-center text-sm font-bold text-slate-700 mb-2">Automating Financial Inefficiency</h3>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="heroChart"></canvas>
+                        </div>
+                        <p class="text-center text-xs text-slate-500 mt-2">Data based on internal observational studies & industry metrics.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Approved Tooling Ecosystem -->
+        <section id="tools" class="scroll-mt-24">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-slate-900">Approved Tooling Ecosystem</h2>
+                <p class="text-slate-600 mt-3 max-w-2xl mx-auto">Ravensdown's highly curated taxonomy of AI applications, strictly categorized by data residency and security architectures.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Enterprise Grade -->
+                <div class="bg-white rounded-2xl shadow-sm border border-emerald-200 overflow-hidden">
+                    <div class="bg-emerald-50 px-6 py-4 border-b border-emerald-100 flex items-center justify-between">
+                        <h3 class="font-bold text-emerald-900 text-lg flex items-center gap-2">
+                            <span class="text-emerald-600 text-2xl">&#128274;</span> Enterprise-Grade Tools
+                        </h3>
+                        <span class="text-xs font-bold bg-emerald-200 text-emerald-800 px-2 py-1 rounded">SENSITIVE DATA APPROVED</span>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl shrink-0">Co</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Microsoft Copilot (Enterprise)</h4>
+                                <p class="text-sm text-slate-600 mt-1">Deeply embedded in M365 (Excel, Outlook, Teams). Ideal for variance analysis and financial reporting. Must verify enterprise license.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xl shrink-0">GPT</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">ChatGPT (Enterprise)</h4>
+                                <p class="text-sm text-slate-600 mt-1">Highly secure analytical assistant. Excellent for policy interpretation and text summarization.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xl shrink-0">&#9881;</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Embedded AI (ServiceNow/HubSpot)</h4>
+                                <p class="text-sm text-slate-600 mt-1">Secure operational orchestration. Outputs require independent human checks before publishing.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consumer Grade -->
+                <div class="bg-white rounded-2xl shadow-sm border border-amber-200 overflow-hidden">
+                    <div class="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center justify-between">
+                        <h3 class="font-bold text-amber-900 text-lg flex items-center gap-2">
+                            <span class="text-amber-600 text-2xl">&#9888;</span> Consumer-Grade Tools
+                        </h3>
+                        <span class="text-xs font-bold bg-amber-200 text-amber-900 px-2 py-1 rounded">PUBLIC DATA ONLY</span>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xl shrink-0">Px</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Perplexity Pro & Free</h4>
+                                <p class="text-sm text-slate-600 mt-1">Real-time web research with citations. Ideal for macroeconomic trend spotting. <strong>NO internal data.</strong></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xl shrink-0">Cl</div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">Claude / Gemini / Standard ChatGPT</h4>
+                                <p class="text-sm text-slate-600 mt-1">Excellent for brainstorming and structure. Approved ONLY for public or heavily scrubbed documents.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                            <span class="text-red-600 text-lg mt-0.5">&#10006;</span>
+                            <p class="text-xs text-red-800"><strong>BLOCKED:</strong> Tools like Grok are explicitly blocked from the network due to lack of security controls.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Real-Life Workflows (Interactive Explorer) -->
+        <section id="workflows" class="scroll-mt-24">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900">Real-Life Finance Workflows</h2>
+                <p class="text-slate-600 mt-2">Explore how AI is practically applied in corporate finance environments, featuring internal capabilities and external industry examples.</p>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Left Menu (Cards) -->
+                <div class="lg:w-1/3 flex flex-col gap-4" id="workflow-menu">
+                    
+                    <div class="use-case-card active bg-white border border-slate-200 p-5 rounded-xl" data-target="uc-ird">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-slate-900">Regulatory Fraud Detection</h4>
+                            <span class="bg-red-100 text-red-800 text-[10px] px-2 py-0.5 rounded font-bold">EXTERNAL INDUSTRY</span>
+                        </div>
+                        <p class="text-sm text-slate-500">How the NZ Inland Revenue Department (IRD) utilizes AI to recover millions.</p>
+                    </div>
+
+                    <div class="use-case-card bg-white border border-slate-200 p-5 rounded-xl" data-target="uc-variance">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-slate-900">Excel Variance Analysis</h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded font-bold">MICROSOFT COPILOT</span>
+                        </div>
+                        <p class="text-sm text-slate-500">Automating root-cause identification directly within ERP-connected spreadsheets.</p>
+                    </div>
+
+                    <div class="use-case-card bg-white border border-slate-200 p-5 rounded-xl" data-target="uc-carbon">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-slate-900">Environmental Finance</h4>
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-bold">CARBONCROP</span>
+                        </div>
+                        <p class="text-sm text-slate-500">Tracking carbon sequestration to generate quantifiable financial value.</p>
+                    </div>
+
+                    <div class="use-case-card bg-white border border-slate-200 p-5 rounded-xl" data-target="uc-ar">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-slate-900">Accounts Receivable</h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded font-bold">OUTLOOK / ERP</span>
+                        </div>
+                        <p class="text-sm text-slate-500">Autonomous drafting of personalized collection emails and payment plans.</p>
+                    </div>
+
+                </div>
+
+                <!-- Right Content Pane -->
+                <div class="lg:w-2/3 bg-white rounded-2xl shadow-md border border-slate-200 p-8 min-h-[400px]" id="workflow-content">
+                    
+                    <!-- Content: IRD -->
+                    <div id="uc-ird" class="workflow-pane block space-y-5">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xl">&#128110;</div>
+                            <h3 class="text-2xl font-bold text-slate-900">The IRD's Algorithmic Enforcement</h3>
+                        </div>
+                        <div class="bg-slate-50 border-l-4 border-slate-400 p-4 mb-4">
+                            <p class="text-sm text-slate-700 italic">"The regulator is currently utilizing supercomputing and machine learning to analyze corporate filings; therefore, corporations must deploy equally sophisticated AI... simply to maintain parity."</p>
+                        </div>
+                        <h4 class="font-bold text-slate-800">Real-Life Industry Example</h4>
+                        <p class="text-slate-600">The New Zealand Inland Revenue Department (IRD) has aggressively integrated AI, machine learning, and advanced network analytics to enforce corporate tax compliance.</p>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-600 text-sm">
+                            <li><strong>Massive Scale:</strong> In a recent six-month period, IRD's AI screened over <strong class="text-slate-900">3 million tax returns</strong>.</li>
+                            <li><strong>Financial Impact:</strong> This algorithmic dragnet successfully recovered nearly <strong class="text-red-600 font-bold">$860 million</strong> in undeclared tax revenue.</li>
+                            <li><strong>Complex Pattern Recognition:</strong> The AI autonomously maps intricate relationship networks across multiple corporate entities and trusts, detecting movement of capital involving shadow directors that human auditors miss.</li>
+                            <li><strong>Specific Targets:</strong> Highly successful in analyzing the property development sector and complex GST calculations.</li>
+                        </ul>
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg text-sm text-blue-900">
+                            <strong>Internal Takeaway:</strong> AI-driven fraud detection is no longer optional. Models learn baseline "normal" behavior and instantly flag statistical outliers without predefined rules, reducing false positives and alert fatigue for compliance teams.
+                        </div>
+                    </div>
+
+                    <!-- Content: Variance -->
+                    <div id="uc-variance" class="workflow-pane hidden space-y-5">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl">&#128200;</div>
+                            <h3 class="text-2xl font-bold text-slate-900">Automated Variance Analysis</h3>
+                        </div>
+                        <p class="text-slate-600">Copilot for Finance elegantly bridges the gap between raw ERP data and Excel, automating the identification of root causes for operational divergence.</p>
+                        
+                        <div class="space-y-4 mt-4">
+                            <div class="flex gap-4">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shrink-0">1</div>
+                                <div>
+                                    <strong class="text-slate-800">Contextual Grounding</strong>
+                                    <p class="text-sm text-slate-600">Analyst opens the Copilot sidecar in Excel. The AI automatically ingests the structured flat table and pivot table data.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shrink-0">2</div>
+                                <div>
+                                    <strong class="text-slate-800">Natural Language Query</strong>
+                                    <p class="text-sm text-slate-600 bg-slate-100 p-2 rounded mt-1 font-mono text-xs">"Focus analysis strictly on negative revenue variances across EMEA for Q4, prioritizing variations > 10%"</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shrink-0">3</div>
+                                <div>
+                                    <strong class="text-slate-800">Deep Pattern Recognition</strong>
+                                    <p class="text-sm text-slate-600">The AI traces the anomaly back to raw data, identifying drivers (e.g., unexpected logistics cost spike from a specific vendor) and generates a coherent narrative.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 border-t border-slate-200 pt-4 flex justify-between items-center">
+                            <span class="text-sm text-slate-500">Requires: Microsoft Copilot (Enterprise)</span>
+                            <span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded font-bold">~20 mins saved per account</span>
+                        </div>
+                    </div>
+
+                    <!-- Content: Carbon -->
+                    <div id="uc-carbon" class="workflow-pane hidden space-y-5">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl">&#127795;</div>
+                            <h3 class="text-2xl font-bold text-slate-900">Environmental Finance Tracking</h3>
+                        </div>
+                        <h4 class="font-bold text-slate-800">Real-Life Industry Example</h4>
+                        <p class="text-slate-600">AI is driving value in highly specialized intersections of finance and environmental sustainability, specifically regarding Scope 3 mitigation.</p>
+                        
+                        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm mt-4">
+                            <h5 class="font-bold text-blue-600 mb-2">The CarbonCrop & AgriZeroNZ Integration</h5>
+                            <p class="text-sm text-slate-600 mb-3">Ravensdown leverages AI-driven platforms like CarbonCrop to help farmers recognize and accelerate carbon sequestration across biodiverse forests.</p>
+                            <ul class="list-disc pl-5 space-y-1 text-sm text-slate-600">
+                                <li>Models monitor and verify sequestration with extreme precision.</li>
+                                <li>Accelerates the issuing of compliance or voluntary carbon removal units.</li>
+                                <li>Automates complex forest assessments at scale.</li>
+                            </ul>
+                        </div>
+                        <p class="text-sm text-slate-700 mt-4"><strong>Financial Impact:</strong> For finance and investment teams managing AgriZeroNZ partnerships, this translates direct environmental action into quantifiable, auditable financial value on the ledger.</p>
+                    </div>
+
+                    <!-- Content: AR -->
+                    <div id="uc-ar" class="workflow-pane hidden space-y-5">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl">&#128231;</div>
+                            <h3 class="text-2xl font-bold text-slate-900">Accounts Receivable Automation</h3>
+                        </div>
+                        <p class="text-slate-600">Traditionally, an AR manager toggles between an ERP screen, an aging report, and Outlook. AI eliminates this friction.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <div class="text-2xl mb-2">&#128269;</div>
+                                <h5 class="font-bold text-slate-800 text-sm">Context Surfacing</h5>
+                                <p class="text-xs text-slate-600 mt-1">Copilot securely connects to the ERP, automatically surfacing outstanding invoices directly within the Outlook email interface.</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <div class="text-2xl mb-2">&#128172;</div>
+                                <h5 class="font-bold text-slate-800 text-sm">Personalized Drafting</h5>
+                                <p class="text-xs text-slate-600 mt-1">Autonomously drafts context-aware emails detailing overdue balances, attaches PDF invoices, and proposes dynamic payment plans based on client history.</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 md:col-span-2">
+                                <div class="text-2xl mb-2">&#128257;</div>
+                                <h5 class="font-bold text-slate-800 text-sm">ERP Synchronization</h5>
+                                <p class="text-xs text-slate-600 mt-1">Following interaction, the AI summarizes the email thread and writes notes directly back into the ERP system, ensuring a single source of truth without manual data entry.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Prompt Engineering (Interactive) -->
+        <section id="prompting" class="scroll-mt-24 bg-slate-900 text-white rounded-3xl p-8 md:p-12 shadow-xl">
+            <div class="md:flex gap-10">
+                <div class="md:w-1/3 mb-8 md:mb-0">
+                    <h2 class="text-3xl font-bold mb-4">The ROLES Framework</h2>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                        Stop treating AI like a search engine. To generate actionable financial outputs without hallucinations, use structured prompt engineering. Build a prompt here to see how it works.
+                    </p>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li><strong class="text-white">R</strong>ole: Establish persona.</li>
+                        <li><strong class="text-white">O</strong>bjective: Define exact task.</li>
+                        <li><strong class="text-white">L</strong>imits: Rigid constraints.</li>
+                        <li><strong class="text-white">E</strong>xpectations: Output format.</li>
+                        <li><strong class="text-white">S</strong>afeguards: Handling missing data.</li>
+                    </ul>
+                </div>
+                
+                <div class="md:w-2/3 bg-slate-800 rounded-xl p-6 border border-slate-700">
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Scenario</label>
+                            <select id="prompt-scenario" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                                <option value="variance">Variance Analysis</option>
+                                <option value="exec">Executive Dashboard</option>
+                                <option value="model">Financial Model Structure</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <div class="absolute -top-3 left-4 bg-slate-800 px-2 text-xs font-bold text-blue-400 uppercase">Generated Prompt</div>
+                        <div id="generated-prompt" class="bg-slate-900 border border-slate-600 rounded-lg p-5 text-sm font-mono text-slate-300 min-h-[150px] leading-relaxed">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <button id="copy-prompt" class="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded text-sm font-bold transition flex justify-center items-center gap-2">
+                        <span>&#128203;</span> Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-100 border-t border-slate-200 mt-12 py-8 text-center text-slate-500 text-sm">
+        <p>Ravensdown Corporate Finance | AI Governance Committee Alignment</p>
+        <p class="mt-2 text-xs">Note: Ensure data anonymization protocols are followed prior to external AI analysis.</p>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. Workflow Tab Switching Logic ---
+            const cards = document.querySelectorAll('.use-case-card');
+            const panes = document.querySelectorAll('.workflow-pane');
+
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Remove active from all cards & panes
+                    cards.forEach(c => c.classList.remove('active', 'border-blue-500'));
+                    panes.forEach(p => p.classList.add('hidden'));
+
+                    // Add active to clicked
+                    card.classList.add('active', 'border-blue-500');
+                    const targetId = card.getAttribute('data-target');
+                    document.getElementById(targetId).classList.remove('hidden');
+                });
+            });
+
+            // --- 2. Prompt Builder Logic ---
+            const promptData = {
+                variance: {
+                    r: "Act as a Senior FP&A Director.",
+                    o: "Create a variance analysis template for the Q4 departmental budget comparing actual spend against the finalized budget.",
+                    l: "Limit your mathematical analysis strictly to operational expenditures, explicitly excluding all one-time capital depreciation costs.",
+                    e: "Output the result strictly as a structured table including: Line Item, Budgeted Amount, Actual Spend, Variance Percentage, Root Cause Hypothesis, and Recommended Remediation.",
+                    s: "If data is insufficient to explain a variance, explicitly state 'Insufficient Data' rather than guessing."
+                },
+                exec: {
+                    r: "Act as a Chief Financial Officer.",
+                    o: "Generate an executive financial summary from the pasted ledger data. Calculate DSO, DPO, and working capital ratio.",
+                    l: "Do not hallucinate external market conditions. Base analysis ONLY on the provided text.",
+                    e: "Present findings as a highly concise, bulleted executive summary adopting a formal tone, followed by a markdown table.",
+                    s: "If any key metric cannot be calculated due to missing inputs, highlight this omission in bold at the top of the summary."
+                },
+                model: {
+                    r: "Act as an Expert Financial Modeler.",
+                    o: "Outline the complete mathematical structure for a comprehensive financial model for a manufacturing entity with four distinct product lines.",
+                    l: "Assume standard GAAP accounting principles. Do not generate fake numbers; provide the structural logic only.",
+                    e: "Detail specific inputs required for an Assumptions tab, Income Statement, Cash Flow, and Output Dashboard.",
+                    s: "Ensure all inter-sheet references are explicitly described to prevent circular logic."
+                }
+            };
+
+            const scenarioSelect = document.getElementById('prompt-scenario');
+            const promptOutput = document.getElementById('generated-prompt');
+            const copyBtn = document.getElementById('copy-prompt');
+
+            function updatePrompt() {
+                const val = scenarioSelect.value;
+                const data = promptData[val];
+                const html = `
+                    <span class="text-white font-bold">[Role]</span> ${data.r}<br><br>
+                    <span class="text-white font-bold">[Objective]</span> ${data.o}<br><br>
+                    <span class="text-white font-bold">[Limits]</span> ${data.l}<br><br>
+                    <span class="text-white font-bold">[Expectations]</span> ${data.e}<br><br>
+                    <span class="text-white font-bold">[Safeguards]</span> ${data.s}
+                `;
+                promptOutput.innerHTML = html;
+            }
+
+            scenarioSelect.addEventListener('change', updatePrompt);
+            updatePrompt(); // Init
+
+            copyBtn.addEventListener('click', () => {
+                const textToCopy = promptOutput.innerText;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<span>&#10003;</span> Copied!';
+                    copyBtn.classList.replace('bg-slate-700', 'bg-emerald-600');
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalText;
+                        copyBtn.classList.replace('bg-emerald-600', 'bg-slate-700');
+                    }, 2000);
+                });
+            });
+
+            // --- 3. Chart.js Initialization ---
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            
+            const ctx = document.getElementById('heroChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Routine Manual Tasks', 'Variance Analysis (Per Acct)'],
+                    datasets: [
+                        {
+                            label: 'Legacy Process (Hours)',
+                            data: [520, 0.5], // 0.5 roughly represents 30 mins
+                            backgroundColor: '#94a3b8', // slate-400
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'AI-Assisted (Hours)',
+                            data: [104, 0.16], // 104 assumes 80% reduction for illustration, 0.16 is ~10 mins
+                            backgroundColor: '#3b82f6', // blue-500
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            type: 'logarithmic', // Log scale makes the 520 vs 0.5 visually parseable on one chart
+                            grid: { color: '#e2e8f0' },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    if (value === 0.1 || value === 1 || value === 10 || value === 100 || value === 1000) {
+                                        return value + ' hrs';
+                                    }
+                                    return '';
+                                }
+                            }
+                        },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: ${context.raw} Hours`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
